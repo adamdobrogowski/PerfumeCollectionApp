@@ -1,2 +1,3 @@
 diagramy
-.venv/
+/backend/api/.env
+node_modules
