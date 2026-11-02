@@ -1,0 +1,28 @@
+{
+ "config": {
+  "OUTPUT_DIR": "wyniki_embeddingow",
+  "MIN_DF_NOTE": 3,
+  "ACCORD_RANK_WEIGHTS": [
+   1.0,
+   0.75,
+   0.56,
+   0.42,
+   0.32
+  ],
+  "IDF_POWER": 0.5,
+  "A_ALPHA_ACCORD": 0.4,
+  "B_CTX_SMOOTH": 0.5,
+  "B_ACCORD_GAIN": 1.5,
+  "B_TOP1_WEIGHT": 0.75,
+  "B_PPMI_SHIFT": 0.69,
+  "HYBRID_W_A": 0.3,
+  "DIM": 256,
+  "SEED": 42
+ },
+ "kształt": [
+  24046,
+  512
+ ],
+ "kolumny 0-255": "metoda A",
+ "kolumny 256-511": "metoda B*"
+}
