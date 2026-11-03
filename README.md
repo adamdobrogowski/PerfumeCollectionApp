@@ -1,6 +1,6 @@
 # PerfumeCollectionApp
 
-Aplikacja do rekomendacji perfum. Dane perfum pochodzą z Fragrantiki. Każde perfumy mają wektor zapachowy (512 liczb), należy do jednej z 17 podrodzin i 7 rodzin zapachowych, a całość leży w bazie PostgreSQL (z pgvector) w Supabase.
+Aplikacja do rekomendacji perfum. Dane perfum pochodzą z Fragrantiki. Każde perfumy mają wektor zapachowy (512 liczb), należą do jednej z 17 podrodzin i 7 rodzin zapachowych, a całość leży w bazie PostgreSQL (z pgvector) w Supabase.
 
 Ten plik opisuje, jak uruchomić projekt **na nowym komputerze**. Najpierw sprawdź, którą ścieżkę potrzebujesz.
 
