@@ -1,0 +1,20 @@
+# Biblioteki Pythona do notatnikow (embeddings, clustering, export_DB). Python 3.12.
+# Instalacja: pip install -r requirements.txt
+# Uwaga: wersje nie sa przypiete. Po uruchomieniu notatnikow u wlasciciela projektu wygeneruj dokladne
+# wersje poleceniem `pip freeze > requirements.txt` - wyniki klasteryzacji moga zalezec od wersji bibliotek.
+numpy
+pandas
+scipy
+scikit-learn
+matplotlib
+# wczytanie missing_accords_complete.xlsx (data_cleaning.ipynb)
+openpyxl
+# mapa UMAP w clustering.ipynb
+umap-learn
+# uruchamianie notatnikow w VS Code
+ipykernel
+# polaczenie z baza (export_DB.ipynb, komorki 7-10)
+python-dotenv
+psycopg[binary]
+# TYLKO dla notes_dictionary.ipynb (odkomentuj i dodatkowo: python -m spacy download en_core_web_sm)
+# spacy
