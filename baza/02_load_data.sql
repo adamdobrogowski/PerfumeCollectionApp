@@ -1,9 +1,5 @@
 -- =====================================================================================================
 -- 02_load_data.sql - ladowanie plikow CSV z notatnika export_DB.ipynb (folder baza_import)
--- Uruchom Z FOLDERU, W KTORYM LEZY baza_import (u Ciebie: notatniki), np.:
---   psql -U <uzytkownik> -d <baza> -f ../baza/02_load_data.sql
--- \copy czyta pliki po stronie klienta (psql), wiec nie wymaga uprawnien serwera do dysku. Sciezki wzgledne od biezacego folderu.
--- Wszystko w jednej transakcji: przy bledzie nic nie zostaje zaladowane. Kolejnosc: najpierw tabele, do ktorych odwoluja sie inne.
 -- =====================================================================================================
 \set ON_ERROR_STOP on
 BEGIN;

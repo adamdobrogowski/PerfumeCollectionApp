@@ -1,6 +1,5 @@
 -- =====================================================================================================
 -- 03_indexes_and_checks.sql - indeksy (po zaladowaniu danych) i kontrole poladowaniu
--- Uruchom: psql -U <uzytkownik> -d <baza> -f baza/03_indexes_and_checks.sql
 -- =====================================================================================================
 \set ON_ERROR_STOP on
 

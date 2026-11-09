@@ -1,8 +1,5 @@
 -- =====================================================================================================
 -- 01_schema.sql - schemat bazy perfum (PostgreSQL 15+ z rozszerzeniem pgvector 0.5+)
--- Uruchom na pustej bazie:  psql -U <uzytkownik> -d <baza> -f baza/01_schema.sql
--- Kolejnosc: rozszerzenia -> typy wyliczeniowe -> tabele (najpierw slowniki, potem tabele zalezne).
--- Indeksy nietrywialne (wektorowy, trigramowe) powstaja w 03_indexes_and_checks.sql PO zaladowaniu danych.
 -- =====================================================================================================
 \set ON_ERROR_STOP on
 
