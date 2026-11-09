@@ -1,9 +1,11 @@
 const express = require("express");
 const { getPool } = require("./db");
+const { createSessionMiddleware } = require("./auth/session"); 
 
 const app = express();
 
 app.use(express.json());
+app.use(createSessionMiddleware());  
 
 app.get("/api/v1/health", (req, res) => {
   res.status(200).json({

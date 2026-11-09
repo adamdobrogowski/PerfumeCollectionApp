@@ -1,0 +1,40 @@
+// Konfiguracja sesji użytkowników: express-session z zapisem w PostgreSQL (tabela user_sessions).
+
+const session = require('express-session');
+const connectPgSimple = require('connect-pg-simple');
+const { getPool } = require('../db');
+
+const SESSION_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+function createSessionMiddleware() {
+    const secret = process.env.SESSION_SECRET;
+    if (!secret) {
+        throw new Error("SESSION_SECRET nie jest ustawiony w pliku .env");
+    }
+
+    const PgStore = connectPgSimple(session);
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    return session({
+        store: new PgStore({
+            pool: getPool(),
+            tableName: 'user_sessions',
+            createTableIfMissing: false,
+        }),
+        name: 'perfume.sid',
+        secret,
+        resave: false,
+        // Sesja powstaje dopiero po zalogowaniu, a nie dla każdego odwiedzającego.
+        saveUninitialized: false,
+        // Każda aktywność przedłuża sesję o kolejne 7 dni.
+        rolling: true,
+        cookie: {
+            httpOnly: true,       // ciasteczka nie odczyta skrypt na stronie (ochrona przed XSS)
+            sameSite: 'lax',      // ciasteczko nie jest wysyłane z cudzych stron (ochrona przed CSRF)
+            secure: isProduction, 
+            maxAge: SESSION_MAX_AGE_MS,
+        },
+    });
+}
+
+module.exports = { createSessionMiddleware };
