@@ -4,6 +4,7 @@ const { hashPassword, verifyPassword, verifyDummyPassword } = require('../auth/p
 const { validateRegistration, validateLogin } = require('../auth/validation');
 const { loginUser, SESSION_COOKIE_NAME } = require('../auth/session');
 const { authLimiter } = require('../auth/rate-limit');
+const { requireAuth, requireAdmin } = require('../auth/middleware');
 
 const router = express.Router();
 
@@ -96,32 +97,8 @@ router.post('/logout', (req, res) => {
     });
 });
 
-router.get('/me', async (req, res) => {
-    const userId = req.session.userId;
-    if (!userId) {
-        return res.status(401).json({ status: 'error', message: 'Nie jesteś zalogowany.' });
-    }
-
-    try {
-        const result = await getPool().query(
-            'SELECT user_id, email, role, blocked_at FROM users WHERE user_id = $1',
-            [userId]
-        );
-        const user = result.rows[0];
-
-        // Konto usunięte lub zablokowane po zalogowaniu: kończymy sesję.
-        if (!user || user.blocked_at) {
-            return req.session.destroy(() => {
-                res.clearCookie(SESSION_COOKIE_NAME);
-                res.status(401).json({ status: 'error', message: 'Nie jesteś zalogowany.' });
-            });
-        }
-
-        return res.json({ userId: user.user_id, email: user.email, role: user.role });
-    } catch (err) {
-        console.error('Błąd odczytu bieżącego użytkownika:', err.message);
-        return res.status(500).json({ status: 'error', message: 'Nie udało się pobrać użytkownika.' });
-    }
+router.get('/me', requireAuth, (req, res) => {
+    return res.json(req.user);
 });
 
 module.exports = router;
