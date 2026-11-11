@@ -37,4 +37,16 @@ function createSessionMiddleware() {
     });
 }
 
-module.exports = { createSessionMiddleware };
+function loginUser(req, userId) {
+    return new Promise((resolve, reject) => {
+        req.session.regenerate((regenerateError) => {
+            if (regenerateError) {
+                return reject(regenerateError);
+            } 
+            req.session.userId = userId;
+            req.session.save((saveError) => (saveError ? reject(saveError) : resolve()));
+        });
+    });
+}
+
+module.exports = { createSessionMiddleware, loginUser };
