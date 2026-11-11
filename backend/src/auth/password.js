@@ -23,7 +23,17 @@ async function verifyPassword(storedHash, plainPassword) {
     }
 }
 
+let dummyHashPromise = null;
+
+async function verifyDummyPassword(plainPassword) {
+    if (!dummyHashPromise) {
+        dummyHashPromise = hashPassword("atrapa-wyrownujaca-czas-odpowiedzi");
+    }
+    return verifyPassword(await dummyHashPromise, plainPassword);
+}
+
 module.exports = {
     hashPassword,
-    verifyPassword
+    verifyPassword,
+    verifyDummyPassword
 };

@@ -47,6 +47,21 @@ function validateRegistration (body) {
     return { value: { email, password } };
 }
 
+function validateLogin (body) {
+    const input = body ?? {};
+    if (typeof input.email !== 'string' || typeof input.password !== 'string') {
+        return { error: 'Podaj adres e-mail i hasło.' };
+    }
+    const email = normalizeEmail(input.email);
+    if (email.length === 0 || email.length > EMAIL_MAX_LENGTH
+        || input.password.length === 0 || Array.from(input.password).length > PASSWORD_MAX_LENGTH) {
+        return { error: 'Podaj adres e-mail i hasło.' };
+    }
+    return { value: { email, password: input.password } };
+}
+
+
 module.exports = {
     validateRegistration,
+    validateLogin
 };

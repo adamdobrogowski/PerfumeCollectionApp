@@ -5,6 +5,7 @@ const connectPgSimple = require('connect-pg-simple');
 const { getPool } = require('../db');
 
 const SESSION_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+const SESSION_COOKIE_NAME = 'perfume.sid';
 
 function createSessionMiddleware() {
     const secret = process.env.SESSION_SECRET;
@@ -21,7 +22,7 @@ function createSessionMiddleware() {
             tableName: 'user_sessions',
             createTableIfMissing: false,
         }),
-        name: 'perfume.sid',
+        name:  SESSION_COOKIE_NAME,
         secret,
         resave: false,
         // Sesja powstaje dopiero po zalogowaniu, a nie dla każdego odwiedzającego.
@@ -49,4 +50,4 @@ function loginUser(req, userId) {
     });
 }
 
-module.exports = { createSessionMiddleware, loginUser };
+module.exports = { createSessionMiddleware, loginUser, SESSION_COOKIE_NAME };
