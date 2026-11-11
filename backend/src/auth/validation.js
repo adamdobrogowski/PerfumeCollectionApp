@@ -60,8 +60,42 @@ function validateLogin (body) {
     return { value: { email, password: input.password } };
 }
 
+function validatePasswordChange (body) {
+    const input = body ?? {};
+    const errors = {};
+
+    if (typeof input.currentPassword !== 'string' || input.currentPassword.length === 0
+        || Array.from(input.currentPassword).length > PASSWORD_MAX_LENGTH) {
+        errors.currentPassword = 'Podaj obecne hasło.';
+    }
+
+    if (typeof input.newPassword !== 'string') {
+        errors.newPassword = 'Podaj nowe hasło.';
+    } else {
+        const length = Array.from(input.newPassword).length;
+        if (length < PASSWORD_MIN_LENGTH || length > PASSWORD_MAX_LENGTH) {
+            errors.newPassword = `Hasło musi mieć od ${PASSWORD_MIN_LENGTH} do ${PASSWORD_MAX_LENGTH} znaków.`;
+        }
+    }
+
+    if (Object.keys(errors).length > 0) {
+        return { errors };
+    }
+    return { value: { currentPassword: input.currentPassword, newPassword: input.newPassword } };
+}
+
+function validateDeleteAccount(body) {
+    const input = body ?? {};
+    if (typeof input.password !== 'string' || input.password.length === 0
+        || Array.from(input.password).length > PASSWORD_MAX_LENGTH) {
+        return { error: 'Podaj hasło.' };
+    }
+    return { value: { password: input.password } };
+}
 
 module.exports = {
     validateRegistration,
-    validateLogin
+    validateLogin,
+    validatePasswordChange,
+    validateDeleteAccount
 };

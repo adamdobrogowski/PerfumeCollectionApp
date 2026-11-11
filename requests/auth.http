@@ -67,3 +67,72 @@ Content-Type: application/json
 
 ### 11. Limit prób: wyślij punkt 8 jedenaście razy pod rząd, jedenasta odpowiedź to 429
 # (limit zlicza tylko nieudane próby, licznik zerujesz restartem serwera)
+
+### 12. Konto jednorazowe do testów: oczekuję 201
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{ "email": "test3@example.com", "password": "Przykladowe-haslo-123" }
+
+### 13. Zmiana hasła bez newPassword: oczekuję 400 z fields.newPassword
+POST {{baseUrl}}/auth/change-password
+Content-Type: application/json
+
+{ "currentPassword": "Przykladowe-haslo-123" }
+
+### 14. Nowe hasło takie samo jak obecne: oczekuję 400
+POST {{baseUrl}}/auth/change-password
+Content-Type: application/json
+
+{ "currentPassword": "Przykladowe-haslo-123", "newPassword": "Przykladowe-haslo-123" }
+
+### 15. Złe obecne hasło: oczekuję 403
+POST {{baseUrl}}/auth/change-password
+Content-Type: application/json
+
+{ "currentPassword": "zle-haslo-123456", "newPassword": "Nowe-haslo-456789" }
+
+### 16. Poprawna zmiana: oczekuję 204
+POST {{baseUrl}}/auth/change-password
+Content-Type: application/json
+
+{ "currentPassword": "Przykladowe-haslo-123", "newPassword": "Nowe-haslo-456789" }
+
+### 17. /me po zmianie hasła: oczekuję 200 (bieżąca sesja zostaje)
+GET {{baseUrl}}/auth/me
+
+### 18. Wylogowanie: oczekuję 204
+POST {{baseUrl}}/auth/logout
+
+### 19. Logowanie STARYM hasłem: oczekuję 401
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "test3@example.com", "password": "Przykladowe-haslo-123" }
+
+### 20. Logowanie NOWYM hasłem: oczekuję 200
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "test3@example.com", "password": "Nowe-haslo-456789" }
+
+### 21. Usunięcie konta ze złym hasłem: oczekuję 403
+POST {{baseUrl}}/auth/delete-account
+Content-Type: application/json
+
+{ "password": "zle-haslo-123456" }
+
+### 22. Usunięcie konta poprawnym hasłem: oczekuję 204 i wyczyszczonego ciasteczka
+POST {{baseUrl}}/auth/delete-account
+Content-Type: application/json
+
+{ "password": "Nowe-haslo-456789" }
+
+### 23. /me po usunięciu: oczekuję 401
+GET {{baseUrl}}/auth/me
+
+### 24. Logowanie na usunięte konto: oczekuję 401
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "test3@example.com", "password": "Nowe-haslo-456789" }

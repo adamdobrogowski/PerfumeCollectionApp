@@ -1,7 +1,7 @@
 const express = require('express');
 const { getPool } = require('../db');
 const { hashPassword, verifyPassword, verifyDummyPassword } = require('../auth/password');
-const { validateRegistration, validateLogin } = require('../auth/validation');
+const { validateRegistration, validateLogin, validatePasswordChange, validateDeleteAccount } = require('../auth/validation');
 const { loginUser, SESSION_COOKIE_NAME } = require('../auth/session');
 const { authLimiter } = require('../auth/rate-limit');
 const { requireAuth, requireAdmin } = require('../auth/middleware');
@@ -99,6 +99,94 @@ router.post('/logout', (req, res) => {
 
 router.get('/me', requireAuth, (req, res) => {
     return res.json(req.user);
+});
+
+async function getPasswordHash(userId) {
+    const result = await getPool().query('SELECT password_hash FROM users WHERE user_id = $1', [userId]);
+    return result.rows[0]?.password_hash ?? null;
+}
+
+router.post('/change-password', requireAuth, authLimiter, async (req, res) => {
+    const { errors, value } = validatePasswordChange(req.body);
+    if (errors) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'Dane zmiany hasła są nieprawidłowe.',
+            fields: errors,
+        });
+    }
+    if (value.newPassword === value.currentPassword) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'Dane zmiany hasła są nieprawidłowe.',
+            fields: { newPassword: 'Nowe hasło musi różnić się od obecnego.' },
+        });
+    }
+
+    try {
+        const storedHash = await getPasswordHash(req.user.userId);
+        const passwordOk = storedHash ? await verifyPassword(storedHash, value.currentPassword) : false;
+        if (!passwordOk) {
+            return res.status(403).json({ status: 'error', message: 'Obecne hasło jest nieprawidłowe.' });
+        }
+
+        const newHash = await hashPassword(value.newPassword);
+
+        // Jedno zapytanie: zmiana hasła i usunięcie wszystkich innych sesji tego użytkownika.
+        await getPool().query(
+            `WITH updated AS (
+                 UPDATE users
+                 SET password_hash = $1, updated_at = now()
+                 WHERE user_id = $2
+                 RETURNING user_id
+             )
+             DELETE FROM user_sessions
+             WHERE sess->>'userId' = (SELECT user_id::text FROM updated)
+               AND sid <> $3`,
+            [newHash, req.user.userId, req.sessionID]
+        );
+
+        return res.status(204).end();
+    } catch (err) {
+        console.error('Błąd zmiany hasła:', err.message);
+        return res.status(500).json({ status: 'error', message: 'Nie udało się zmienić hasła.' });
+    }
+});
+
+router.post('/delete-account', requireAuth, authLimiter, async (req, res) => {
+    const { error, value } = validateDeleteAccount(req.body);
+    if (error) {
+        return res.status(400).json({ status: 'error', message: error });
+    }
+
+    try {
+        const storedHash = await getPasswordHash(req.user.userId);
+        const passwordOk = storedHash ? await verifyPassword(storedHash, value.password) : false;
+        if (!passwordOk) {
+            return res.status(403).json({ status: 'error', message: 'Hasło jest nieprawidłowe.' });
+        }
+
+        // Jedno zapytanie: usunięcie konta i wszystkich jego sesji (user_sessions nie ma klucza obcego do users).
+        await getPool().query(
+            `WITH deleted AS (
+                 DELETE FROM users WHERE user_id = $1 RETURNING user_id
+             )
+             DELETE FROM user_sessions
+             WHERE sess->>'userId' = (SELECT user_id::text FROM deleted)`,
+            [req.user.userId]
+        );
+    } catch (err) {
+        console.error('Błąd usuwania konta:', err.message);
+        return res.status(500).json({ status: 'error', message: 'Nie udało się usunąć konta.' });
+    }
+
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Błąd kończenia sesji po usunięciu konta:', err.message);
+        }
+        res.clearCookie(SESSION_COOKIE_NAME);
+        return res.status(204).end();
+    });
 });
 
 module.exports = router;
