@@ -19,7 +19,7 @@ POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
-  "email": "test2@example.com",
+  "email": "test5@example.com",
   "password": "Przykladowe-haslo-123"
 }
 
@@ -28,7 +28,7 @@ POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "test1@example.com",
+  "email": "test5@example.com",
   "password": "Przykladowe-haslo-123"
 }
 
@@ -69,10 +69,10 @@ Content-Type: application/json
 # (limit zlicza tylko nieudane próby, licznik zerujesz restartem serwera)
 
 ### 12. Konto jednorazowe do testów: oczekuję 201
-POST {{baseUrl}}/auth/register
+POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
-{ "email": "test3@example.com", "password": "Przykladowe-haslo-123" }
+{ "email": "test6@example.com", "password": "Nowe-haslo-456789" }
 
 ### 13. Zmiana hasła bez newPassword: oczekuję 400 z fields.newPassword
 POST {{baseUrl}}/auth/change-password
@@ -96,7 +96,7 @@ Content-Type: application/json
 POST {{baseUrl}}/auth/change-password
 Content-Type: application/json
 
-{ "currentPassword": "Przykladowe-haslo-123", "newPassword": "Nowe-haslo-456789" }
+{ "currentPassword": "Nowe-haslo-456789", "newPassword": "Przykladowe-haslo-123" }
 
 ### 17. /me po zmianie hasła: oczekuję 200 (bieżąca sesja zostaje)
 GET {{baseUrl}}/auth/me
@@ -108,13 +108,13 @@ POST {{baseUrl}}/auth/logout
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
-{ "email": "test3@example.com", "password": "Przykladowe-haslo-123" }
+{ "email": "test6@example.com", "password": "Nowe-haslo-456789" }
 
 ### 20. Logowanie NOWYM hasłem: oczekuję 200
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
-{ "email": "test3@example.com", "password": "Nowe-haslo-456789" }
+{ "email": "test6@example.com", "password": "Przykladowe-haslo-123" }
 
 ### 21. Usunięcie konta ze złym hasłem: oczekuję 403
 POST {{baseUrl}}/auth/delete-account
@@ -126,7 +126,7 @@ Content-Type: application/json
 POST {{baseUrl}}/auth/delete-account
 Content-Type: application/json
 
-{ "password": "Nowe-haslo-456789" }
+{ "password": "Przykladowe-haslo-123" }
 
 ### 23. /me po usunięciu: oczekuję 401
 GET {{baseUrl}}/auth/me
@@ -135,4 +135,4 @@ GET {{baseUrl}}/auth/me
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
-{ "email": "test3@example.com", "password": "Nowe-haslo-456789" }
+{ "email": "test6@example.com", "password": "Nowe-haslo-456789" }
