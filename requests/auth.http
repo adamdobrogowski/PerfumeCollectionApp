@@ -136,3 +136,15 @@ POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 { "email": "test6@example.com", "password": "Nowe-haslo-456789" }
+
+### 25. Błędny JSON: oczekuję 400
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "test1@example.com", }
+
+### 26. Nieistniejąca trasa w API: oczekuję 404 w JSON
+GET {{baseUrl}}/nieistnieje
+
+### 27. Adres główny serwera: oczekuję 404 w JSON
+GET http://localhost:8080/

@@ -1,9 +1,11 @@
 const express = require("express");
+const helmet = require("helmet");
 const { getPool } = require("./db");
 const { createSessionMiddleware } = require("./auth/session"); 
 const authRoutes = require("./routes/auth");
 
 const app = express();
+app.use(helmet());
 
 app.use(express.json());
 app.use(createSessionMiddleware());  
@@ -35,6 +37,24 @@ app.get("/api/v1/health/db", async (req, res) => {
     console.error("Blad testu bazy:", err.message);
     res.status(503).json({ status: "error", message: "Brak polaczenia z baza" });
   }
+});
+
+app.use((req, res) => {
+  res.status(404).json({ status: "error", message: "Nie znaleziono zasobu." });
+});
+
+app.use((err, req, res, next) => {
+  if (res.headersSent) {
+    return next(err);
+  }
+  if (err.type === "entity.parse.failed") {
+    return res.status(400).json({ status: "error", message: "Niepoprawny format JSON." });
+  }
+  if (err.type === 'entity.too.large') {
+    return res.status(413).json({ status: "error", message: "Przesyłany JSON jest zbyt duży." });
+  }
+  console.error("Nieobsłużony błąd:", err);
+  return res.status(500).json({ status: "error", message: "Wystąpił nieoczekiwany błąd serwera." });
 });
 
 module.exports = app;
