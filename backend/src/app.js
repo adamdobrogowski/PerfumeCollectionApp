@@ -3,6 +3,7 @@ const helmet = require("helmet");
 const { getPool } = require("./db");
 const { createSessionMiddleware } = require("./auth/session"); 
 const authRoutes = require("./routes/auth");
+const perfumeRoutes = require("./routes/perfumes");
 
 const app = express();
 app.use(helmet());
@@ -10,6 +11,7 @@ app.use(helmet());
 app.use(express.json());
 app.use(createSessionMiddleware());  
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/perfumes", perfumeRoutes);
 
 app.get("/api/v1/health", (req, res) => {
   res.status(200).json({
