@@ -1,12 +1,75 @@
 const express = require('express');
 const { getPool } = require('../db');
 const { requireAuth } = require('../auth/middleware');
+const { parseSearchParams, buildSearchQueries } = require('../catalog/perfume-search');
 const router = express.Router();
 
 router.use(requireAuth);
 
 const MAX_INTEGER_ID = 2147483647;
 
+// Wyszukiwarka: lista perfum z filtrami, stronicowaniem i sortowaniem.
+router.get('/', async (req, res) => {
+    const { params, error } = parseSearchParams(req.query);
+    if (error) {
+        return res.status(400).json({ status: 'error', message: error });
+    }
+
+    try {
+        const pool = getPool();
+        const queries = buildSearchQueries(params);
+
+        const pageResult = await pool.query(queries.pageSql, queries.pageValues);
+        if (pageResult.rows.length === 0) {
+            const total = params.offset === 0
+                ? 0
+                : Number((await pool.query(queries.countSql, queries.countValues)).rows[0].total);
+            return res.json({ items: [], total, limit: params.limit, offset: params.offset });
+        }
+        const total = Number(pageResult.rows[0].total);
+
+        // Akordy pobieramy jednym zapytaniem dla wszystkich perfum ze strony (zamiast jednego zapytania na perfumy).
+        const accordsResult = await pool.query(
+            `SELECT pa.perfume_id, a.accord_id, a.name
+             FROM perfume_accords pa
+             JOIN accords a ON a.accord_id = pa.accord_id
+             WHERE pa.perfume_id = ANY($1::int[])
+             ORDER BY pa.perfume_id, pa.accord_rank`,
+            [pageResult.rows.map((row) => row.perfume_id)]
+        );
+        const accordsByPerfume = new Map();
+        for (const row of accordsResult.rows) {
+            if (!accordsByPerfume.has(row.perfume_id)) {
+                accordsByPerfume.set(row.perfume_id, []);
+            }
+            accordsByPerfume.get(row.perfume_id).push({ id: row.accord_id, name: row.name });
+        }
+
+        return res.json({
+            items: pageResult.rows.map((row) => ({
+                id: row.perfume_id,
+                name: row.name,
+                brand: { id: row.brand_id, name: row.brand_name },
+                gender: row.gender,
+                releaseYear: row.release_year,
+                sourceRating: row.source_rating_value === null
+                    ? null
+                    : { value: Number(row.source_rating_value), count: row.source_rating_count },
+                family: { id: row.family_id, name: row.family_name },
+                subfamily: { id: row.subfamily_id, name: row.subfamily_name },
+                accords: accordsByPerfume.get(row.perfume_id) ?? [],
+            })),
+            total,
+            limit: params.limit,
+            offset: params.offset,
+        });
+    } catch (err) {
+        console.error('Błąd wyszukiwania perfum:', err.message);
+        return res.status(500).json({ status: 'error', message: 'Nie udało się wyszukać perfum.' });
+    }
+});
+
+// Karta perfum: szczegóły perfum, akordy, nuty i perfumiarze.
 router.get('/:id', async (req, res) => {
     if (!/^[1-9]\d{0,9}$/.test(req.params.id) || Number(req.params.id) > MAX_INTEGER_ID) {
         return res.status(400).json({ status: 'error', message: 'Nieprawidłowy identyfikator perfum.' });

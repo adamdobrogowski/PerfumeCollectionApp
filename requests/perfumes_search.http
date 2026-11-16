@@ -1,0 +1,89 @@
+@baseUrl = http://localhost:8080/api/v1
+
+# Identyfikatory nut ogólnych zależą od bazy (licznik przesunięty o próbę na sucho skryptu 06):
+#   nuta ogólna rose = 1990, vanilla = 2155, musk = 1786; akord woody = 83, sweet = 70, fresh = 31
+#   marka MUGLER = 767; rodzina 103 = "Białe kwiaty i cytrus"
+# Gdyby wyniki się nie zgadzały, sprawdź w bazie: select general_note_id from general_notes where name = 'rose';
+
+### 1. Logowanie (konto test5): oczekuję 200 i ciasteczka perfume.sid
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test5@example.com",
+  "password": "Przykladowe-haslo-123"
+}
+
+
+### 2. Bez parametrów: oczekuję 200, total 24046, limit 20, offset 0, 20 pozycji; pierwsze to ALIEN i ANGEL (najpopularniejsze)
+# Każda pozycja: id, name, brand, gender, releaseYear, sourceRating, family, subfamily, accords (do 5, wg rangi)
+GET {{baseUrl}}/perfumes
+
+### 3. Fraza z marką i nazwą: oczekuję 200, total 13, na górze DIOR SAUVAGE
+GET {{baseUrl}}/perfumes?q=dior%20sauvage
+
+### 4. Fraza + płeć: oczekuję total 12 (zawęża wynik z punktu 3)
+GET {{baseUrl}}/perfumes?q=dior%20sauvage&gender=men
+
+### 5. Fraza za krótka: oczekuję 400 i "Wyszukiwana fraza musi mieć co najmniej 3 znaki."
+GET {{baseUrl}}/perfumes?q=ab
+
+### 6. Znak specjalny we frazie (100%): oczekuję 200 i total 0 (znak % szukany dosłownie, bez błędu)
+GET {{baseUrl}}/perfumes?q=100%25
+
+### 7. Rodzina + płeć: oczekuję total 2649
+GET {{baseUrl}}/perfumes?family=103&gender=women
+
+### 8. Marka: oczekuję total 100, same perfumy MUGLER (na górze ALIEN, ANGEL)
+GET {{baseUrl}}/perfumes?brand=767&limit=5
+
+### 9. Dwie nuty ogólne naraz (rose i vanilla): oczekuję total 3290
+GET {{baseUrl}}/perfumes?notes=1990,2155
+
+### 10. Nuta z wykluczeniem (rose bez vanilla): oczekuję total 4787
+GET {{baseUrl}}/perfumes?notes=1990&excludeNotes=2155
+
+### 11. Akordy z wykluczeniem (woody + sweet, bez fresh, męskie): oczekuję total 304, na górze AVENTUS
+GET {{baseUrl}}/perfumes?accords=83,70&excludeAccords=31&gender=men
+
+### 12. Sortowanie od najnowszych: oczekuję lat malejąco (zaczyna się od 2024)
+GET {{baseUrl}}/perfumes?sort=newest&limit=5
+
+### 13. Sortowanie po nazwie: oczekuję kolejności alfabetycznej (zaczyna się od "0")
+GET {{baseUrl}}/perfumes?sort=name&limit=5
+
+### 14. Druga strona: oczekuję 20 pozycji, offset 20, pierwsza to ENCRE NOIRE
+GET {{baseUrl}}/perfumes?limit=20&offset=20
+
+### 15. Offset za końcem listy: oczekuję 200, items [] i total 24046
+GET {{baseUrl}}/perfumes?offset=24046
+
+### 16. Nieistniejąca nuta: oczekuję 200, items [] i total 0
+GET {{baseUrl}}/perfumes?notes=2147483647
+
+### 17. Błędna płeć: oczekuję 400 i komunikatu o wartościach women, men, unisex
+GET {{baseUrl}}/perfumes?gender=kids
+
+### 18. Lista nut z literą: oczekuję 400
+GET {{baseUrl}}/perfumes?notes=1990,abc
+
+### 19. Ta sama nuta wymagana i wykluczona: oczekuję 400
+GET {{baseUrl}}/perfumes?notes=1990&excludeNotes=1990
+
+### 20. Zbyt duży limit: oczekuję 400 i "Parametr limit musi być liczbą całkowitą od 1 do 50."
+GET {{baseUrl}}/perfumes?limit=51
+
+### 21. Nieznane sortowanie: oczekuję 400
+GET {{baseUrl}}/perfumes?sort=rating
+
+### 22. Sortowanie relevance bez frazy: oczekuję 400 i "Sortowanie relevance wymaga parametru q."
+GET {{baseUrl}}/perfumes?sort=relevance
+
+### 23. Powtórzony parametr: oczekuję 400 i "Parametr q podaj tylko raz."
+GET {{baseUrl}}/perfumes?q=dior&q=sauvage
+
+### 24. Wylogowanie: oczekuję 204
+POST {{baseUrl}}/auth/logout
+
+### 25. Wyszukiwarka bez logowania (po wylogowaniu): oczekuję 401 i "Nie jesteś zalogowany."
+GET {{baseUrl}}/perfumes

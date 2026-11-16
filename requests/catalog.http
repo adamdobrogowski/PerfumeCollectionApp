@@ -1,0 +1,47 @@
+@baseUrl = http://localhost:8080/api/v1
+
+# Identyfikatory marek, akordów i rodzin są stałe. Identyfikatory nut ogólnych w Twojej bazie są
+# przesunięte (rose = 1990), więc nuty sprawdzamy po nazwie, a nie po numerze.
+
+### 1. Logowanie (konto test5): oczekuję 200 i ciasteczka perfume.sid
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test5@example.com",
+  "password": "Przykladowe-haslo-123"
+}
+
+
+### 2. Marki: oczekuję 200 i items z 1060 markami (odpowiedź ok. 72 kB)
+# Pierwsza: "A DOZEN ROSES", ostatnia: "ZOOLOGIST PERFUMES"; marka MUGLER: id 767, country "France", perfumeCount 100
+GET {{baseUrl}}/brands
+
+### 3. Akordy: oczekuję 200 i items z 84 akordami
+# Pierwsze dwa: "alcohol", "aldehydic"; woody: id 83, perfumeCount 12523; sweet: id 70, perfumeCount 7471
+GET {{baseUrl}}/accords
+
+### 4. Rodziny: oczekuję 200 i items z 7 rodzinami (id 101-107), każda z listą subfamilies (razem 17)
+# perfumeCount rodzin: 101=6101, 102=4525, 103=3627, 104=3733, 105=2744, 106=2695, 107=621 (razem 24046)
+# Rodzina 103 ma podrodziny: 9 "Białe kwiaty" (2181) i 11 "Cytrus i neroli" (1446)
+GET {{baseUrl}}/families
+
+### 5. Nuty ogólne: oczekuję 200 i items z 1109 nutami (odpowiedź ok. 98 kB)
+# Pierwsze dwie: "absinthe", "acai berry", ostatnia: "zinnia"
+# rose: perfumeCount 8077, specificNotes 36 pozycji (w tym "rose")
+# vanilla: perfumeCount 8348, specificNotes 15 pozycji
+# tonka bean: perfumeCount 3398, specificNotes tylko dwie: "tonka" i "tonka bean"
+# absinthe: specificNotes [] (grupa z jedną nutą)
+GET {{baseUrl}}/notes
+
+### 6. Wylogowanie: oczekuję 204
+POST {{baseUrl}}/auth/logout
+
+### 7. Marki bez logowania: oczekuję 401 i "Nie jesteś zalogowany."
+GET {{baseUrl}}/brands
+
+### 8. Nuty bez logowania: oczekuję 401
+GET {{baseUrl}}/notes
+
+### 9. Health bez logowania: oczekuję 200 i "Backend is running." (sprawdza, że nowa trasa nie zablokowała health)
+GET {{baseUrl}}/health
