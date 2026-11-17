@@ -26,15 +26,16 @@ async function loadBrands(pool) {
 
 async function loadAccords(pool) {
     const result = await pool.query(
-        `SELECT a.accord_id, a.name, count(pa.perfume_id) AS perfume_count
+        `SELECT a.accord_id, a.name, a.name_pl, count(pa.perfume_id) AS perfume_count
          FROM accords a
          LEFT JOIN perfume_accords pa ON pa.accord_id = a.accord_id
-         GROUP BY a.accord_id, a.name
+         GROUP BY a.accord_id, a.name, a.name_pl
          ORDER BY a.name COLLATE "C"`
     );
     return result.rows.map((row) => ({
         id: row.accord_id,
         name: row.name,
+        namePl: row.name_pl, 
         perfumeCount: Number(row.perfume_count),
     }));
 }
@@ -81,11 +82,11 @@ async function loadFamilies(pool) {
 async function loadGeneralNotes(pool) {
     // Zapytania wykonują się po kolei, żeby jedno żądanie nie zajmowało kilku połączeń z małej puli.
     const generalResult = await pool.query(
-        `SELECT g.general_note_id, g.name, count(DISTINCT pn.perfume_id) AS perfume_count
+        `SELECT g.general_note_id, g.name, g.name_pl, count(DISTINCT pn.perfume_id) AS perfume_count
          FROM general_notes g
          JOIN notes n ON n.general_note_id = g.general_note_id
          LEFT JOIN perfume_notes pn ON pn.note_id = n.note_id
-         GROUP BY g.general_note_id, g.name
+         GROUP BY g.general_note_id, g.name, g.name_pl
          ORDER BY g.name COLLATE "C"`
     );
     const membersResult = await pool.query(
@@ -106,6 +107,7 @@ async function loadGeneralNotes(pool) {
     return generalResult.rows.map((row) => ({
         id: row.general_note_id,
         name: row.name,
+        namePl: row.name_pl, 
         perfumeCount: Number(row.perfume_count),
         specificNotes: membersByGroup.get(row.general_note_id) ?? [],
     }));

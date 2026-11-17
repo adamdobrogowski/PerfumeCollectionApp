@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
 
         // Akordy pobieramy jednym zapytaniem dla wszystkich perfum ze strony (zamiast jednego zapytania na perfumy).
         const accordsResult = await pool.query(
-            `SELECT pa.perfume_id, a.accord_id, a.name
+            `SELECT pa.perfume_id, a.accord_id, a.name, a.name_pl
              FROM perfume_accords pa
              JOIN accords a ON a.accord_id = pa.accord_id
              WHERE pa.perfume_id = ANY($1::int[])
@@ -42,7 +42,7 @@ router.get('/', async (req, res) => {
             if (!accordsByPerfume.has(row.perfume_id)) {
                 accordsByPerfume.set(row.perfume_id, []);
             }
-            accordsByPerfume.get(row.perfume_id).push({ id: row.accord_id, name: row.name });
+            accordsByPerfume.get(row.perfume_id).push({ id: row.accord_id, name: row.name, namePl: row.name_pl });
         }
 
         return res.json({
@@ -118,7 +118,7 @@ router.get('/:id', async (req, res) => {
         );
 
         const accordsResult = await pool.query(
-            `SELECT a.accord_id, a.name, pa.accord_rank
+            `SELECT a.accord_id, a.name, a.name_pl, pa.accord_rank
              FROM perfume_accords pa
              JOIN accords a ON a.accord_id = pa.accord_id
              WHERE pa.perfume_id = $1
@@ -156,6 +156,7 @@ router.get('/:id', async (req, res) => {
             accords: accordsResult.rows.map((row) => ({
                 id: row.accord_id,
                 name: row.name,
+                namePl: row.name_pl,
                 rank: row.accord_rank,
             })),
         });

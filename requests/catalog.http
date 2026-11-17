@@ -19,6 +19,7 @@ GET {{baseUrl}}/brands
 
 ### 3. Akordy: oczekuję 200 i items z 84 akordami
 # Pierwsze dwa: "alcohol", "aldehydic"; woody: id 83, perfumeCount 12523; sweet: id 70, perfumeCount 7471
+# Każdy akord ma też namePl: woody → "drzewny" (id 83), citrus → "cytrusowy" (id 22), white floral → "białe kwiaty" (id 81)
 GET {{baseUrl}}/accords
 
 ### 4. Rodziny: oczekuję 200 i items z 7 rodzinami (id 101-107), każda z listą subfamilies (razem 17)
@@ -32,6 +33,7 @@ GET {{baseUrl}}/families
 # vanilla: perfumeCount 8348, specificNotes 15 pozycji
 # tonka bean: perfumeCount 3398, specificNotes tylko dwie: "tonka" i "tonka bean"
 # absinthe: specificNotes [] (grupa z jedną nutą)
+# namePl: rose → "róża", vetiver → "wetiweria", absinthe → "absynt"; nuty w specificNotes nie mają namePl
 GET {{baseUrl}}/notes
 
 ### 6. Wylogowanie: oczekuję 204

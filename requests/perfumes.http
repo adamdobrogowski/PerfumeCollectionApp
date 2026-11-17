@@ -12,6 +12,7 @@ Content-Type: application/json
 
 ### 2. Karta perfum: oczekuję 200 z id, name, brand, gender, family, subfamily, perfumers, notes (top/middle/base), accords
 # Jeśli dostaniesz 404, zmień id na inne.
+# Każdy akord ma id, name, namePl (polska nazwa) i rank; nuty (notes) bez zmian, po angielsku.
 GET {{baseUrl}}/perfumes/1
 
 ### 3. Nieistniejące perfumy (poprawny format id): oczekuję 404 i "Nie znaleziono perfum."

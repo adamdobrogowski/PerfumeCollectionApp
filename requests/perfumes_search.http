@@ -16,7 +16,7 @@ Content-Type: application/json
 
 
 ### 2. Bez parametrów: oczekuję 200, total 24046, limit 20, offset 0, 20 pozycji; pierwsze to ALIEN i ANGEL (najpopularniejsze)
-# Każda pozycja: id, name, brand, gender, releaseYear, sourceRating, family, subfamily, accords (do 5, wg rangi)
+# Każda pozycja: id, name, brand, gender, releaseYear, sourceRating, family, subfamily, accords (do 5, wg rangi; każdy akord: id, name, namePl)
 GET {{baseUrl}}/perfumes
 
 ### 3. Fraza z marką i nazwą: oczekuję 200, total 13, na górze DIOR SAUVAGE
