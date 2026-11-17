@@ -40,7 +40,8 @@ function AppLayout() {
             ))}
           </Group>
           <Group gap="md" wrap="nowrap" style={{ flex: 1 }} justify="flex-end">
-            <HeaderSearch />
+            {/* Katalog ma własne pole wyszukiwania, więc w nagłówku go nie dublujemy. */}
+            {pathname !== '/catalog' && <HeaderSearch />}
             <UserMenu />
           </Group>
         </Group>
