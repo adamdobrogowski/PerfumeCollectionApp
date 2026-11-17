@@ -13,7 +13,6 @@ function AppLayout() {
   const { pathname } = useLocation()
   // Poniżej progu "sm" (48em) sekcje przechodzą na dolny pasek.
   const isMobile = useMediaQuery('(max-width: 47.99em)', false, { getInitialValueInEffect: false })
-  console.log('AppLayout render, isMobile =', isMobile)
 
   const isActive = (path) => pathname === path || pathname.startsWith(`${path}/`)
 
