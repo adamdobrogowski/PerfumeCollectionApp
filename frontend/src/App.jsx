@@ -1,13 +1,12 @@
 import { Route, Routes } from 'react-router'
 import { RequireAuth, RequireGuest } from './auth/guards.jsx'
-import DiscoverPage from './pages/DiscoverPage.jsx'
+import AppLayout from './layout/AppLayout.jsx'
+import ComingSoonPage from './pages/ComingSoonPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
 import RegisterPage from './pages/RegisterPage.jsx'
 import WelcomePage from './pages/WelcomePage.jsx'
 
-
-// Trasy aplikacji. Zagnieżdżone trasy dziedziczą ochronę ze strażnika, który je otacza.
 function App() {
   return (
     <Routes>
@@ -17,7 +16,14 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
       </Route>
       <Route element={<RequireAuth />}>
-        <Route path="/discover" element={<DiscoverPage />} />
+        <Route element={<AppLayout />}>
+          <Route path="/discover" element={<ComingSoonPage title="Odkrywaj" />} />
+          <Route path="/catalog" element={<ComingSoonPage title="Katalog" />} />
+          <Route path="/shelf" element={<ComingSoonPage title="Półka" />} />
+          <Route path="/feed" element={<ComingSoonPage title="Tablica" />} />
+          <Route path="/profile" element={<ComingSoonPage title="Profil" />} />
+          <Route path="/settings" element={<ComingSoonPage title="Ustawienia konta" />} />
+        </Route>
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
