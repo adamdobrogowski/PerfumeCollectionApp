@@ -40,3 +40,16 @@ export async function apiFetch(path, { method = 'GET', body } = {}) {
   }
   return data
 }
+
+export function buildQuery(params) {
+  const search = new URLSearchParams()
+  for (const [name, value] of Object.entries(params)) {
+    const text = Array.isArray(value) ? value.join(',') : value
+    if (text === undefined || text === null || text === '') {
+      continue
+    }
+    search.set(name, String(text))
+  }
+  const query = search.toString()
+  return query === '' ? '' : `?${query}`
+}

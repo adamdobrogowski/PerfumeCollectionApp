@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router'
 import { RequireAuth, RequireGuest } from './auth/guards.jsx'
 import AppLayout from './layout/AppLayout.jsx'
+import CatalogPage from './pages/CatalogPage.jsx'
 import ComingSoonPage from './pages/ComingSoonPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
@@ -18,7 +19,7 @@ function App() {
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           <Route path="/discover" element={<ComingSoonPage title="Odkrywaj" />} />
-          <Route path="/catalog" element={<ComingSoonPage title="Katalog" />} />
+          <Route path="/catalog" element={<CatalogPage />} />
           <Route path="/shelf" element={<ComingSoonPage title="Półka" />} />
           <Route path="/feed" element={<ComingSoonPage title="Tablica" />} />
           <Route path="/profile" element={<ComingSoonPage title="Profil" />} />
