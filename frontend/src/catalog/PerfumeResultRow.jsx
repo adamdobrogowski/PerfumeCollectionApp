@@ -1,7 +1,6 @@
 import { Badge, Group, Paper, Stack, Text } from '@mantine/core'
+import { GENDER_LABELS } from './labels.js'
 import { getDisplayName } from './names.js'
-
-const GENDER_LABELS = { women: 'kobiece', men: 'męskie', unisex: 'unisex' }
 
 function formatRating(sourceRating) {
   if (sourceRating === null) {

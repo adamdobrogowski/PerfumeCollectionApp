@@ -1,0 +1,1 @@
+export const GENDER_LABELS = { women: 'kobiece', men: 'męskie', unisex: 'unisex' }

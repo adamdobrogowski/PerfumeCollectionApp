@@ -14,6 +14,7 @@ import {
 } from '@mantine/core'
 import { useDebouncedCallback } from '@mantine/hooks'
 import { useSearchParams } from 'react-router'
+import CatalogFilters from '../catalog/CatalogFilters.jsx'
 import PerfumeResultRow from '../catalog/PerfumeResultRow.jsx'
 import {
   MAX_PHRASE_LENGTH,
@@ -22,10 +23,9 @@ import {
   getSearchPhrase,
   normalizePhrase,
 } from '../catalog/phrase.js'
+import { useCatalogFilters } from '../catalog/useCatalogFilters.js'
 import { MAX_PAGE, PAGE_SIZE, usePerfumeSearch } from '../catalog/usePerfumeSearch.js'
 
-// Numer strony z adresu. Wszystko, co nie jest poprawną liczbą od 1, daje stronę 1,
-// a zbyt duży numer zostaje obcięty do MAX_PAGE (dalej poprawi go efekt poniżej).
 function parsePage(text) {
   if (text === null || !/^[1-9]\d*$/.test(text)) {
     return 1
@@ -33,8 +33,6 @@ function parsePage(text) {
   return Math.min(Number(text), MAX_PAGE)
 }
 
-// Kopia parametrów adresu z ustawionym numerem strony. Strona 1 to brak parametru (czysty adres),
-// a pozostałe parametry (później filtry) zostają bez zmian.
 function withPage(searchParams, page) {
   const next = new URLSearchParams(searchParams)
   if (page === 1) {
@@ -45,8 +43,6 @@ function withPage(searchParams, page) {
   return next
 }
 
-// Kopia parametrów adresu z ustawioną frazą. Zmiana frazy wraca na stronę 1, ale gdy fraza się
-// nie zmieniła (np. doszła spacja na końcu), zwracamy te same parametry, żeby nie zgubić numeru strony.
 function withPhrase(searchParams, phrase) {
   if (phrase === (searchParams.get('q') ?? '')) {
     return searchParams
@@ -67,10 +63,7 @@ function CatalogPage() {
   const urlPhrase = searchParams.get('q') ?? ''
   const searchPhrase = getSearchPhrase(urlPhrase)
 
-  // Tekst w polu może wyprzedzać adres (adres aktualizuje się po 400 ms przerwy w pisaniu).
-  // Gdy adres zmieni się z zewnątrz (przycisk "wstecz", kliknięcie "Katalog" w menu),
-  // a nie przez nasze pole, ustawiamy tekst w polu na wartość z adresu.
-  // To wzorzec "dostosuj stan podczas renderowania", bez dodatkowego efektu.
+
   const [text, setText] = useState(urlPhrase)
   const [syncedUrlPhrase, setSyncedUrlPhrase] = useState(urlPhrase)
   if (urlPhrase !== syncedUrlPhrase) {
@@ -80,9 +73,6 @@ function CatalogPage() {
     }
   }
 
-  // Fraza zbyt długa (liczba słów) nie trafia do adresu, więc wyniki zostają poprzednie.
-  // Zbyt krótka trafia, ale do API nie jest wysyłana (patrz getSearchPhrase).
-  // replace: wpisywanie nie dopisuje wpisów do historii przeglądarki.
   const commitPhrase = useDebouncedCallback((value) => {
     const phrase = normalizePhrase(value)
     if (getPhraseProblem(phrase) === 'tooManyWords') {
@@ -91,9 +81,11 @@ function CatalogPage() {
     setSearchParams((previous) => withPhrase(previous, phrase), { replace: true })
   }, { delay: 400 })
 
+  const { filters, brands, families, hasFilters, setFilter, clearFilters } = useCatalogFilters()
   const { data, isPending, isError, error, refetch, isPlaceholderData } = usePerfumeSearch({
     page,
     phrase: searchPhrase,
+    filters,
   })
 
   const totalPages = data ? Math.ceil(data.total / PAGE_SIZE) : 0
@@ -185,6 +177,14 @@ function CatalogPage() {
             </Text>
           )}
         </Stack>
+        <CatalogFilters
+          filters={filters}
+          brands={brands}
+          families={families}
+          hasFilters={hasFilters}
+          onChange={setFilter}
+          onClear={clearFilters}
+        />
         {content}
       </Stack>
     </Container>
