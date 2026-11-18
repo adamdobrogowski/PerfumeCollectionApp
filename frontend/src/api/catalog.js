@@ -29,3 +29,8 @@ export function fetchNotes() {
 export function searchPerfumes(params) {
   return apiFetch(`/perfumes${buildQuery(params)}`)
 }
+
+// Karta perfum: { id, name, brand, family, releaseYear, gender, accords, sourceRating }
+export function fetchPerfume(id) {
+  return apiFetch(`/perfumes/${id}`)
+}

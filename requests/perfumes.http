@@ -32,3 +32,6 @@ POST {{baseUrl}}/auth/logout
 
 ### 8. Karta bez logowania (po wylogowaniu): oczekuję 401 i "Nie jesteś zalogowany."
 GET {{baseUrl}}/perfumes/1
+
+### 9. Karta perfum: każda nuta ma generalNote (id, name, namePl). Użyj tego samego id perfum co w istniejącym teście karty w tym pliku
+GET {{baseUrl}}/perfumes/1

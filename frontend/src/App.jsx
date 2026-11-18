@@ -5,6 +5,7 @@ import CatalogPage from './pages/CatalogPage.jsx'
 import ComingSoonPage from './pages/ComingSoonPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
+import PerfumePage from './pages/PerfumePage.jsx'
 import RegisterPage from './pages/RegisterPage.jsx'
 import WelcomePage from './pages/WelcomePage.jsx'
 
@@ -20,7 +21,7 @@ function App() {
         <Route element={<AppLayout />}>
           <Route path="/discover" element={<ComingSoonPage title="Odkrywaj" />} />
           <Route path="/catalog" element={<CatalogPage />} />
-          <Route path="/shelf" element={<ComingSoonPage title="Półka" />} />
+          <Route path="/perfumes/:id" element={<PerfumePage />} />          <Route path="/shelf" element={<ComingSoonPage title="Półka" />} />
           <Route path="/feed" element={<ComingSoonPage title="Tablica" />} />
           <Route path="/profile" element={<ComingSoonPage title="Profil" />} />
           <Route path="/settings" element={<ComingSoonPage title="Ustawienia konta" />} />

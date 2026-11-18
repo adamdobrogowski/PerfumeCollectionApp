@@ -1,7 +1,11 @@
-import { createTheme } from '@mantine/core'
+import { Button, createTheme } from '@mantine/core'
 
-// Tymczasowy motyw
 export const theme = createTheme({
   primaryColor: 'grape',
   defaultRadius: 'md',
+  components: {
+    Button: Button.extend({
+      styles: { label: { overflow: 'visible' } },
+    }),
+  },
 })

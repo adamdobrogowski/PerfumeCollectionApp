@@ -109,11 +109,13 @@ router.get('/:id', async (req, res) => {
         );
 
         const notesResult = await pool.query(
-            `SELECT n.note_id, n.name, pn.layer
+            `SELECT n.note_id, n.name, pn.layer,
+                    g.general_note_id, g.name AS general_name, g.name_pl AS general_name_pl
              FROM perfume_notes pn
-             JOIN notes n ON n.note_id = pn.note_id
+             JOIN notes n         ON n.note_id = pn.note_id
+             JOIN general_notes g ON g.general_note_id = n.general_note_id
              WHERE pn.perfume_id = $1
-             ORDER BY n.name`,
+             ORDER BY g.name, n.name`,
             [perfumeId]
         );
 
@@ -128,7 +130,11 @@ router.get('/:id', async (req, res) => {
 
         const notes = { top: [], middle: [], base: [] };
         for (const row of notesResult.rows) {
-            notes[row.layer].push({ id: row.note_id, name: row.name });
+            notes[row.layer].push({
+                id: row.note_id,
+                name: row.name,
+                generalNote: { id: row.general_note_id, name: row.general_name, namePl: row.general_name_pl },
+            });
         }
 
         return res.json({
