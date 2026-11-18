@@ -1,53 +1,83 @@
 import { Badge, Group, Paper, Stack, Text } from '@mantine/core'
+import AccordBadge from './AccordBadge.jsx'
 import { GENDER_LABELS } from './labels.js'
-import { getDisplayName } from './names.js'
+import PerfumeCover from './PerfumeCover.jsx'
 
-function formatRating(sourceRating) {
+function capitalizeFirst(text) {
+  return text[0].toUpperCase() + text.slice(1)
+}
+
+function formatRatingCount(count) {
+  const lastDigit = count % 10
+  const lastTwoDigits = count % 100
+  let word = 'ocen'
+  if (count === 1) {
+    word = 'ocena'
+  } else if (lastDigit >= 2 && lastDigit <= 4 && (lastTwoDigits < 12 || lastTwoDigits > 14)) {
+    word = 'oceny'
+  }
+  return `${count.toLocaleString('pl-PL')} ${word}`
+}
+
+function Rating({ sourceRating }) {
   if (sourceRating === null) {
-    return 'brak oceny'
+    return (
+      <Text size="sm" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
+        brak oceny
+      </Text>
+    )
   }
   const value = sourceRating.value.toLocaleString('pl-PL', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })
-  return `${value} (${sourceRating.count.toLocaleString('pl-PL')})`
+  return (
+    <Stack gap={0} align="flex-end">
+      <Text fw={500} style={{ whiteSpace: 'nowrap' }}>
+        ★ {value}
+      </Text>
+      <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
+        {formatRatingCount(sourceRating.count)}
+      </Text>
+    </Stack>
+  )
 }
 
-// Jeden wynik na liście: nazwa, marka, płeć, rodzina, ocena i akordy w kolejności wyczuwalności.
 function PerfumeResultRow({ perfume }) {
-  const details = [perfume.brand.name, GENDER_LABELS[perfume.gender], perfume.family.name]
+  const details = [
+    GENDER_LABELS[perfume.gender] && capitalizeFirst(GENDER_LABELS[perfume.gender]),
+    perfume.releaseYear,
+    perfume.family.name,
+  ].filter(Boolean)
 
   return (
     <Paper withBorder p="md" radius="md">
-      <Group justify="space-between" align="flex-start" wrap="nowrap">
-        <Stack gap={2}>
-          <Text fw={500}>{perfume.name}</Text>
-          <Text size="sm" c="dimmed">
-            {details.filter(Boolean).join(' · ')}
-          </Text>
-        </Stack>
-        <Text size="sm" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
-          {formatRating(perfume.sourceRating)}
-        </Text>
-      </Group>
-      {perfume.accords.length > 0 && (
-        <Group gap={6} mt="xs">
-          {perfume.accords.map((accord) => {
-            const { main, other } = getDisplayName(accord)
-            return (
-              <Badge key={accord.id} variant="light" color="gray" tt="none" fw={400}>
-                {main}
-                {other && (
-                  <Text span c="dimmed" inherit>
-                    {' · '}
-                    {other}
-                  </Text>
-                )}
+      <Group wrap="nowrap" align="center" gap="md">
+        <PerfumeCover brandName={perfume.brand.name} familyId={perfume.family.id} />
+        <Stack gap={6} style={{ flex: 1, minWidth: 0 }}>
+          <Stack gap={0}>
+            <Text size="xs" c="dimmed">
+              {perfume.brand.name}
+            </Text>
+            <Text fw={500}>{perfume.name}</Text>
+          </Stack>
+          <Group gap={6}>
+            {details.map((detail) => (
+              <Badge key={detail} variant="light" color="gray" tt="none" fw={400}>
+                {detail}
               </Badge>
-            )
-          })}
-        </Group>
-      )}
+            ))}
+          </Group>
+          {perfume.accords.length > 0 && (
+            <Group gap={6}>
+              {perfume.accords.map((accord) => (
+                <AccordBadge key={accord.id} accord={accord} />
+              ))}
+            </Group>
+          )}
+        </Stack>
+        <Rating sourceRating={perfume.sourceRating} />
+      </Group>
     </Paper>
   )
 }
