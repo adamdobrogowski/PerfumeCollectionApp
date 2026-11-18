@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router'
-import { parseGender, resolveId, withFilter, withoutFilters } from './filters.js'
+import { parseGenders, resolveId, withFilter, withoutFilters } from './filters.js'
 import { useBrands, useFamilies } from './useDictionaries.js'
 
 export function useCatalogFilters() {
@@ -8,11 +8,11 @@ export function useCatalogFilters() {
   const families = useFamilies()
 
   const filters = {
-    gender: parseGender(searchParams.get('gender')),
+    gender: parseGenders(searchParams.get('gender')),
     brand: resolveId(searchParams.get('brand'), brands.data),
     family: resolveId(searchParams.get('family'), families.data),
   }
-  const hasFilters = Object.values(filters).some((value) => value !== null)
+  const hasFilters = filters.gender.length > 0 || filters.brand !== null || filters.family !== null
 
   function setFilter(name, value) {
     setSearchParams((previous) => withFilter(previous, name, value))

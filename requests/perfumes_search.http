@@ -87,3 +87,17 @@ POST {{baseUrl}}/auth/logout
 
 ### 25. Wyszukiwarka bez logowania (po wylogowaniu): oczekuję 401 i "Nie jesteś zalogowany."
 GET {{baseUrl}}/perfumes
+
+GET {{baseUrl}}/perfumes?q=dior%20sauvage&gender=men
+
+###
+GET {{baseUrl}}/perfumes?q=dior%20sauvage&gender=unisex
+
+### 17b. Kilka płci: oczekuję total równego sumie total z dwóch powyższych zapytań
+GET {{baseUrl}}/perfumes?q=dior%20sauvage&gender=men,unisex
+
+### 17c. Wszystkie trzy płcie: oczekuję total 24046 (jak bez filtru)
+GET {{baseUrl}}/perfumes?gender=women,men,unisex
+
+### 17d. Jedna błędna wartość na liście: oczekuję 400 i komunikatu o wartościach women, men, unisex
+GET {{baseUrl}}/perfumes?gender=men,kids

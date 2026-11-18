@@ -1,14 +1,12 @@
 import { useMemo } from 'react'
-import { Button, Input, SegmentedControl, Select, SimpleGrid, Stack } from '@mantine/core'
+import { Button, Chip, Group, Input, Select, SimpleGrid, Stack } from '@mantine/core'
+import { serializeGenders } from './filters.js'
 import { GENDER_LABELS } from './labels.js'
 
-const GENDER_OPTIONS = [
-  { value: 'all', label: 'Wszystkie' },
-  ...Object.entries(GENDER_LABELS).map(([value, label]) => ({
-    value,
-    label: label[0].toUpperCase() + label.slice(1),
-  })),
-]
+const GENDER_OPTIONS = Object.entries(GENDER_LABELS).map(([value, label]) => ({
+  value,
+  label: label[0].toUpperCase() + label.slice(1),
+}))
 
 function toOptions(items) {
   return items ? items.map((item) => ({ value: String(item.id), label: item.name })) : []
@@ -20,12 +18,20 @@ function CatalogFilters({ filters, brands, families, hasFilters, onChange, onCle
 
   return (
     <Stack gap="sm">
-      <Input.Wrapper label="Płeć">
-        <SegmentedControl
-          data={GENDER_OPTIONS}
-          value={filters.gender ?? 'all'}
-          onChange={(value) => onChange('gender', value === 'all' ? null : value)}
-        />
+      <Input.Wrapper label="Płeć" description="Brak zaznaczenia oznacza wszystkie">
+        <Chip.Group
+          multiple
+          value={filters.gender}
+          onChange={(values) => onChange('gender', serializeGenders(values))}
+        >
+          <Group gap="xs" mt={4}>
+            {GENDER_OPTIONS.map((option) => (
+              <Chip key={option.value} value={option.value}>
+                {option.label}
+              </Chip>
+            ))}
+          </Group>
+        </Chip.Group>
       </Input.Wrapper>
       <SimpleGrid cols={{ base: 1, sm: 2 }}>
         <Select

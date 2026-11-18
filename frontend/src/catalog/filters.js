@@ -4,8 +4,21 @@ const MAX_INTEGER_ID = 2147483647
 
 export const FILTER_KEYS = ['gender', 'brand', 'family']
 
-export function parseGender(text) {
-  return text !== null && Object.hasOwn(GENDER_LABELS, text) ? text : null
+const GENDERS = Object.keys(GENDER_LABELS)
+
+// Płcie z adresu (np. "men,unisex") jako tablica w stałej kolejności.
+export function parseGenders(text) {
+  if (text === null) {
+    return []
+  }
+  const parts = text.split(',').map((part) => part.trim())
+  return GENDERS.filter((gender) => parts.includes(gender))
+}
+
+// Tekst do adresu z zaznaczonych płci albo null, gdy nic nie zaznaczono (brak filtru).
+export function serializeGenders(values) {
+  const genders = GENDERS.filter((gender) => values.includes(gender))
+  return genders.length === 0 ? null : genders.join(',')
 }
 
 // Identyfikator z adresu (tekst): poprawna liczba całkowita w zakresie typu integer albo null.

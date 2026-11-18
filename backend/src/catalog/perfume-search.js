@@ -61,6 +61,18 @@ function readIdList(query, name) {
     return ids;
 }
 
+function readGenderList(query, name) {
+    const text = readText(query, name);
+    if (text === undefined) {
+        return [];
+    }
+    const genders = [...new Set(text.split(',').map((part) => part.trim()))];
+    if (!genders.every((gender) => GENDERS.includes(gender))) {
+        throw new SearchParamError(`Parametr ${name} musi być listą wartości rozdzielonych przecinkami: ${GENDERS.join(', ')}.`);
+    }
+    return genders;
+}
+
 function readInteger(query, name, defaultValue, min, max) {
     const text = readText(query, name);
     if (text === undefined) {
@@ -104,10 +116,7 @@ function assertNoOverlap(included, excluded, includeName, excludeName) {
 function readParams(query) {
     const { phrase, words } = readPhrase(query);
 
-    const gender = readText(query, 'gender');
-    if (gender !== undefined && !GENDERS.includes(gender)) {
-        throw new SearchParamError(`Parametr gender musi mieć wartość: ${GENDERS.join(', ')}.`);
-    }
+    const genders = readGenderList(query, 'gender');
 
     const noteIds = readIdList(query, 'notes');
     const excludeNoteIds = readIdList(query, 'excludeNotes');
@@ -128,7 +137,7 @@ function readParams(query) {
         phrase,
         words,
         brandId: readId(query, 'brand'),
-        gender: gender ?? null,
+        genders,
         familyId: readId(query, 'family'),
         subfamilyId: readId(query, 'subfamily'),
         noteIds,
@@ -181,8 +190,8 @@ function buildSearchQueries(params) {
     if (params.brandId !== null) {
         conditions.push(`p.brand_id = ${add(params.brandId)}`);
     }
-    if (params.gender !== null) {
-        conditions.push(`p.gender = ${add(params.gender)}`);
+    if (params.genders.length > 0) {
+        conditions.push(`p.gender = ANY(${add(params.genders)}::gender_t[])`);
     }
     if (params.familyId !== null) {
         conditions.push(`f.cluster_id = ${add(params.familyId)}`);
