@@ -5,6 +5,7 @@ import {
   Center,
   CloseButton,
   Container,
+  Group,
   Loader,
   Pagination,
   Stack,
@@ -17,6 +18,7 @@ import { useSearchParams } from 'react-router'
 import CatalogFilters from '../catalog/CatalogFilters.jsx'
 import CatalogListFilters from '../catalog/CatalogListFilters.jsx'
 import PerfumeResultRow from '../catalog/PerfumeResultRow.jsx'
+import SortSelect from '../catalog/SortSelect.jsx'
 import {
   MAX_PHRASE_LENGTH,
   PHRASE_HINTS,
@@ -24,6 +26,7 @@ import {
   getSearchPhrase,
   normalizePhrase,
 } from '../catalog/phrase.js'
+import { parseSort, withSort } from '../catalog/sorting.js'
 import { useCatalogFilters } from '../catalog/useCatalogFilters.js'
 import { MAX_PAGE, PAGE_SIZE, usePerfumeSearch } from '../catalog/usePerfumeSearch.js'
 
@@ -96,10 +99,14 @@ function CatalogPage() {
     setList,
     clearFilters,
   } = useCatalogFilters()
+  const hasPhrase = searchPhrase !== undefined
+  const sort = parseSort(searchParams.get('sort'), hasPhrase)
+
   const { data, isPending, isError, error, refetch, isPlaceholderData } = usePerfumeSearch({
     page,
     phrase: searchPhrase,
     filters,
+    sort,
   })
 
   const totalPages = data ? Math.ceil(data.total / PAGE_SIZE) : 0
@@ -129,6 +136,11 @@ function CatalogPage() {
     window.scrollTo({ top: 0 })
   }
 
+  // Zmiana sortowania dopisuje wpis do historii i wraca na stronę 1, tak jak zmiana filtra.
+  function handleSortChange(newSort) {
+    setSearchParams((previous) => withSort(previous, newSort, hasPhrase))
+  }
+
   const phraseProblem = getPhraseProblem(normalizePhrase(text))
 
   let content
@@ -155,9 +167,12 @@ function CatalogPage() {
     const total = data.total.toLocaleString('pl-PL')
     content = (
       <>
-        <Text size="sm" c="dimmed">
-          {searchPhrase ? `Wyniki dla frazy „${searchPhrase}”: ${total}` : `Wyniki: ${total}`}
-        </Text>
+        <Group justify="space-between" align="center">
+          <Text size="sm" c="dimmed">
+            {searchPhrase ? `Wyniki dla frazy „${searchPhrase}”: ${total}` : `Wyniki: ${total}`}
+          </Text>
+          <SortSelect value={sort} hasPhrase={hasPhrase} onChange={handleSortChange} />
+        </Group>
         <Stack gap="sm" style={{ opacity: isPlaceholderData ? 0.6 : 1 }}>
           {data.items.map((perfume) => (
             <PerfumeResultRow key={perfume.id} perfume={perfume} />
