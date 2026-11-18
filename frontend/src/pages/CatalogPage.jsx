@@ -15,6 +15,7 @@ import {
 import { useDebouncedCallback } from '@mantine/hooks'
 import { useSearchParams } from 'react-router'
 import CatalogFilters from '../catalog/CatalogFilters.jsx'
+import CatalogListFilters from '../catalog/CatalogListFilters.jsx'
 import PerfumeResultRow from '../catalog/PerfumeResultRow.jsx'
 import {
   MAX_PHRASE_LENGTH,
@@ -81,7 +82,20 @@ function CatalogPage() {
     setSearchParams((previous) => withPhrase(previous, phrase), { replace: true })
   }, { delay: 400 })
 
-  const { filters, brands, families, hasFilters, setFilter, clearFilters } = useCatalogFilters()
+   const {
+    filters,
+    brands,
+    families,
+    notes,
+    accords,
+    hasFilters,
+    listFilterCount,
+    listsOpen,
+    setListsOpen,
+    setFilter,
+    setList,
+    clearFilters,
+  } = useCatalogFilters()
   const { data, isPending, isError, error, refetch, isPlaceholderData } = usePerfumeSearch({
     page,
     phrase: searchPhrase,
@@ -144,7 +158,6 @@ function CatalogPage() {
         <Text size="sm" c="dimmed">
           {searchPhrase ? `Wyniki dla frazy „${searchPhrase}”: ${total}` : `Wyniki: ${total}`}
         </Text>
-        {/* Podczas ładowania następnej strony stara lista jest przygaszona. */}
         <Stack gap="sm" style={{ opacity: isPlaceholderData ? 0.6 : 1 }}>
           {data.items.map((perfume) => (
             <PerfumeResultRow key={perfume.id} perfume={perfume} />
@@ -184,6 +197,15 @@ function CatalogPage() {
           hasFilters={hasFilters}
           onChange={setFilter}
           onClear={clearFilters}
+        />
+        <CatalogListFilters
+          filters={filters}
+          notes={notes}
+          accords={accords}
+          count={listFilterCount}
+          open={listsOpen}
+          onOpenChange={setListsOpen}
+          onChange={setList}
         />
         {content}
       </Stack>
