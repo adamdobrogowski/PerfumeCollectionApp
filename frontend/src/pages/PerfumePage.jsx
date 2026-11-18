@@ -1,19 +1,57 @@
-import { Alert, Button, Container, Group, Skeleton, Stack, Text, Title } from '@mantine/core'
-import { useLocation, useNavigate, useParams } from 'react-router'
+import { useEffect } from 'react'
+import {
+  Alert,
+  Anchor,
+  Breadcrumbs,
+  Button,
+  Container,
+  Group,
+  SimpleGrid,
+  Skeleton,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
+import AccordBars from '../catalog/AccordBars.jsx'
+import CardSection from '../catalog/CardSection.jsx'
 import { parseId } from '../catalog/filters.js'
+import NotesPyramid from '../catalog/NotesPyramid.jsx'
 import PerfumeHeader from '../catalog/PerfumeHeader.jsx'
 import { usePerfume } from '../catalog/usePerfume.js'
 
 function PerfumeSkeleton() {
   return (
-    <Group align="center" gap="lg">
-      <Skeleton width={140} height={176} />
-      <Stack gap="sm" style={{ flex: 1, minWidth: 220 }}>
-        <Skeleton height={14} width="30%" />
-        <Skeleton height={28} width="60%" />
-        <Skeleton height={20} width="80%" />
-      </Stack>
-    </Group>
+    <Stack gap="md">
+      <Skeleton height={172} radius="md" />
+      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+        <Skeleton height={220} radius="md" />
+        <Skeleton height={220} radius="md" />
+      </SimpleGrid>
+    </Stack>
+  )
+}
+
+function PerfumeContent({ perfume }) {
+  const { subfamily } = perfume
+
+  return (
+    <Stack gap="md">
+      <PerfumeHeader perfume={perfume} />
+      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+        <CardSection title="Akordy" hint="Od najbardziej wyczuwalnego. Długość paska pokazuje tylko kolejność.">
+          <AccordBars accords={perfume.accords} />
+        </CardSection>
+        <CardSection title="Piramida nut" hint="Nazwa główna to nuta ogólna, obok dokładniejsze nuty.">
+          <NotesPyramid notes={perfume.notes} />
+        </CardSection>
+      </SimpleGrid>
+      <CardSection title={`O stylu zapachu: ${subfamily.name}`}>
+        <Text size="sm" c={subfamily.description ? undefined : 'dimmed'}>
+          {subfamily.description ?? 'Brak opisu tej podrodziny.'}
+        </Text>
+      </CardSection>
+    </Stack>
   )
 }
 
@@ -23,6 +61,17 @@ function PerfumePage() {
   const location = useLocation()
   const navigate = useNavigate()
   const { data, isPending, isError, error, refetch } = usePerfume(id)
+
+  useEffect(() => {
+    if (!data) {
+      return undefined
+    }
+    const previousTitle = document.title
+    document.title = `${data.name} · ${data.brand.name} | PerfumeCollection`
+    return () => {
+      document.title = previousTitle
+    }
+  }, [data])
 
   function handleBack() {
     if (location.key === 'default') {
@@ -49,15 +98,30 @@ function PerfumePage() {
   } else if (isPending) {
     content = <PerfumeSkeleton />
   } else {
-    content = <PerfumeHeader perfume={data} />
+    content = <PerfumeContent perfume={data} />
   }
 
   return (
     <Container size="md" py="xl">
       <Stack gap="md">
-        <Button variant="subtle" size="xs" onClick={handleBack} style={{ alignSelf: 'flex-start' }}>
-          ← Wróć
-        </Button>
+        <Group gap="sm">
+          <Button variant="subtle" size="compact-sm" ml={-8} onClick={handleBack}>
+            ← Wróć
+          </Button>
+          {data && (
+            <Breadcrumbs separator="›">
+              <Anchor component={Link} to="/catalog" size="sm">
+                Katalog
+              </Anchor>
+              <Anchor component={Link} to={`/catalog?brand=${data.brand.id}`} size="sm">
+                {data.brand.name}
+              </Anchor>
+              <Text size="sm" c="dimmed">
+                {data.name}
+              </Text>
+            </Breadcrumbs>
+          )}
+        </Group>
         {content}
       </Stack>
     </Container>

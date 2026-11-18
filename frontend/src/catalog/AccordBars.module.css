@@ -1,0 +1,32 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  min-width: max-content;
+  max-width: 100%;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: var(--mantine-font-size-sm);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: filter 100ms ease;
+}
+
+.bar:hover {
+  filter: brightness(0.95);
+}
+
+.bar:focus-visible {
+  outline: 2px solid var(--mantine-primary-color-filled);
+  outline-offset: 2px;
+}
+
+.name {
+  font-weight: 500;
+}
+
+.other {
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 400;
+}

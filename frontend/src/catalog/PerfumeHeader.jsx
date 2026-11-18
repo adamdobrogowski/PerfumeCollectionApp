@@ -1,54 +1,73 @@
-import { Badge, Group, Paper, Stack, Text, Title } from '@mantine/core'
-import { getFamilyColors } from './familyColors.js'
-import { GENDER_LABELS, capitalizeFirst } from './labels.js'
+import { Anchor, Badge, Group, Paper, Stack, Text, Title, Tooltip } from '@mantine/core'
+import { Link } from 'react-router'
+import { GENDER_LABELS, capitalizeFirst, capitalizeWords } from './labels.js'
 import PerfumeCover from './PerfumeCover.jsx'
 import Rating from './Rating.jsx'
 
 function PerfumeHeader({ perfume }) {
-  const { background, ink } = getFamilyColors(perfume.family.id)
-  const badges = [
+  const plainBadges = [
     GENDER_LABELS[perfume.gender] && capitalizeFirst(GENDER_LABELS[perfume.gender]),
     perfume.releaseYear,
-    perfume.family.name,
-    perfume.subfamily.name,
   ].filter(Boolean)
-  const perfumersLabel = perfume.perfumers.length === 1 ? 'Perfumiarz' : 'Perfumiarze'
+  const perfumersLabel = perfume.perfumers.length > 1 ? 'Perfumiarze' : 'Perfumiarz'
+  const perfumersText =
+    perfume.perfumers.length > 0
+      ? perfume.perfumers.map((perfumer) => capitalizeWords(perfumer.name)).join(', ')
+      : 'brak danych'
 
   return (
-    <Paper radius="md" p="lg" style={{ background, border: '1px solid rgba(0, 0, 0, 0.08)' }}>
+    <Paper withBorder radius="md" p="lg">
       <Group align="center" gap="lg">
         <PerfumeCover
           brandName={perfume.brand.name}
           familyId={perfume.family.id}
-          width={140}
-          height={176}
+          width={112}
+          height={140}
         />
         <Stack gap="xs" style={{ flex: 1, minWidth: 220 }}>
-          <Text size="sm" c={ink}>
-            {[perfume.brand.name, perfume.brand.country].filter(Boolean).join(' · ')}
-          </Text>
-          <Title order={2} c={ink}>
-            {perfume.name}
-          </Title>
-          <Group gap={6}>
-            {badges.map((badge) => (
-              <Badge
-                key={badge}
-                tt="none"
-                fw={500}
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.75)', color: ink }}
+          <Text size="sm" c="dimmed">
+            <Tooltip label="Pokaż w katalogu perfumy tej marki" openDelay={300} withArrow>
+              <Anchor
+                component={Link}
+                to={`/catalog?brand=${perfume.brand.id}`}
+                c="dimmed"
+                underline="always"
+                inherit
               >
+                {perfume.brand.name}
+              </Anchor>
+            </Tooltip>
+            {perfume.brand.country && ` · ${perfume.brand.country}`}
+          </Text>
+          <Title order={2}>{perfume.name}</Title>
+          <Group gap={6}>
+            {plainBadges.map((badge) => (
+              <Badge key={badge} variant="light" color="gray" tt="none" fw={400}>
                 {badge}
               </Badge>
             ))}
+            <Tooltip label="Pokaż w katalogu perfumy z tej rodziny" openDelay={300} withArrow>
+              <Badge
+                component={Link}
+                to={`/catalog?family=${perfume.family.id}`}
+                variant="light"
+                color="gray"
+                tt="none"
+                fw={400}
+                style={{ textDecoration: 'underline', cursor: 'pointer' }}
+              >
+                {perfume.family.name}
+              </Badge>
+            </Tooltip>
+            <Badge variant="outline" color="gray" tt="none" fw={400}>
+              {perfume.subfamily.name}
+            </Badge>
           </Group>
-          <Rating sourceRating={perfume.sourceRating} large color={ink} align="flex-start" />
-          {perfume.perfumers.length > 0 && (
-            <Text size="sm" c={ink}>
-              {perfumersLabel}: {perfume.perfumers.map((perfumer) => perfumer.name).join(', ')}
-            </Text>
-          )}
+          <Text size="sm" c="dimmed">
+            {perfumersLabel}: {perfumersText}
+          </Text>
         </Stack>
+        <Rating sourceRating={perfume.sourceRating} large />
       </Group>
     </Paper>
   )
