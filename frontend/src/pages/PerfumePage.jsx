@@ -19,6 +19,7 @@ import { parseId } from '../catalog/filters/filters.js'
 import NotesPyramid from '../perfume/NotesPyramid.jsx'
 import PerfumeHeader from '../perfume/PerfumeHeader.jsx'
 import { usePerfume } from '../perfume/usePerfume.js'
+import ShelfActions from '../shelf/ShelfActions.jsx'
 
 function PerfumeSkeleton() {
   return (
@@ -37,7 +38,7 @@ function PerfumeContent({ perfume }) {
 
   return (
     <Stack gap="md">
-      <PerfumeHeader perfume={perfume} />
+      <PerfumeHeader perfume={perfume} actions={<ShelfActions perfumeId={perfume.id} />} />
       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
         <CardSection title="Akordy" hint="Od najbardziej wyczuwalnego. Długość paska pokazuje tylko kolejność.">
           <AccordBars accords={perfume.accords} />

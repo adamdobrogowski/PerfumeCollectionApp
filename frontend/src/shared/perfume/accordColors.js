@@ -6,7 +6,7 @@ const ACCORD_COLORS = {
   woody: '#8B5A2B',
   earthy: '#7A6248',
   patchouli: '#45723a',
-  oud: '#2e2421',
+  oud: '#1f1512',
   clay: '#B47353',
   sand: '#D9C29C',
   mossy: '#4F6B3A',

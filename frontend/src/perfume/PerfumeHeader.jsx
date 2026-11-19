@@ -4,7 +4,7 @@ import { GENDER_LABELS, capitalizeFirst, capitalizeWords } from '../shared/perfu
 import PerfumeCover from '../shared/perfume/PerfumeCover.jsx'
 import Rating from '../shared/perfume/Rating.jsx'
 
-function PerfumeHeader({ perfume }) {
+function PerfumeHeader({ perfume, actions }) {
   const plainBadges = [
     GENDER_LABELS[perfume.gender] && capitalizeFirst(GENDER_LABELS[perfume.gender]),
     perfume.releaseYear,
@@ -66,6 +66,7 @@ function PerfumeHeader({ perfume }) {
           <Text size="sm" c="dimmed">
             {perfumersLabel}: {perfumersText}
           </Text>
+          {actions}
         </Stack>
         <Rating sourceRating={perfume.sourceRating} large />
       </Group>
