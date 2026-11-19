@@ -66,7 +66,7 @@ const ACCORD_COLORS = {
   anis: '#7B5E8A',
   savory: '#8A6D3B',
   // Bursztynowe, orientalne i miękkie
-  amber: '#C77A1E',
+  amber: '#bb6c06',
   balsamic: '#A5642D',
   oriental: '#B5472D',
   animalic: '#7A4B3A',

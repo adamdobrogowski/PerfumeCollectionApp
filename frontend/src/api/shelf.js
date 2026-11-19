@@ -7,3 +7,7 @@ export function fetchShelfEntry(perfumeId) {
 export function saveShelfEntry(perfumeId, state) {
   return apiFetch(`/shelf/${perfumeId}`, { method: 'PUT', body: state })
 }
+
+export function fetchShelf() {
+  return apiFetch('/shelf')
+}

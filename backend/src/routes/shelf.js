@@ -10,6 +10,41 @@ function toEntry(row) {
     return { opinion: row.opinion, likeStrength: row.like_strength, placement: row.placement };
 }
 
+router.get('/', async (req, res) => {
+    try {
+        const result = await getPool().query(
+            `SELECT p.perfume_id, p.name, p.gender, p.release_year,
+                    b.brand_id, b.name AS brand_name,
+                    f.cluster_id AS family_id, f.name AS family_name,
+                    se.opinion, se.like_strength, se.placement
+             FROM shelf_entries se
+             JOIN perfumes p  ON p.perfume_id = se.perfume_id
+             JOIN brands b    ON b.brand_id = p.brand_id
+             JOIN clusters sf ON sf.cluster_id = p.cluster_id
+             JOIN clusters f  ON f.cluster_id = sf.parent_cluster_id
+             WHERE se.user_id = $1
+             ORDER BY se.updated_at DESC, p.perfume_id`,
+            [req.user.userId]
+        );
+        return res.json({
+            items: result.rows.map((row) => ({
+                perfume: {
+                    id: row.perfume_id,
+                    name: row.name,
+                    brand: { id: row.brand_id, name: row.brand_name },
+                    gender: row.gender,
+                    releaseYear: row.release_year,
+                    family: { id: row.family_id, name: row.family_name },
+                },
+                entry: toEntry(row),
+            })),
+        });
+    } catch (err) {
+        console.error('Błąd pobierania półki:', err.message);
+        return res.status(500).json({ status: 'error', message: 'Nie udało się pobrać półki.' });
+    }
+});
+
 router.get('/:perfumeId', async (req, res) => {
     const perfumeId = parsePerfumeId(req.params.perfumeId);
     if (perfumeId === null) {
