@@ -1,8 +1,8 @@
 import { Box, Stack, Text, Tooltip } from '@mantine/core'
 import { Link } from 'react-router'
-import { getAccordStyle } from './accordColors.js'
+import { getAccordStyle } from '../shared/perfume/accordColors.js'
 import classes from './AccordBars.module.css'
-import { getDisplayName } from './names.js'
+import { getDisplayName } from '../shared/perfume/names.js'
 
 const MIN_BAR_WIDTH = 45
 

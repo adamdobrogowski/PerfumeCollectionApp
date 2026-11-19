@@ -15,20 +15,20 @@ import {
 } from '@mantine/core'
 import { useDebouncedCallback } from '@mantine/hooks'
 import { useSearchParams } from 'react-router'
-import CatalogFilters from '../catalog/CatalogFilters.jsx'
-import CatalogListFilters from '../catalog/CatalogListFilters.jsx'
-import PerfumeResultRow from '../catalog/PerfumeResultRow.jsx'
-import SortSelect from '../catalog/SortSelect.jsx'
+import CatalogFilters from '../catalog/filters/CatalogFilters.jsx'
+import CatalogListFilters from '../catalog/filters/CatalogListFilters.jsx'
+import PerfumeResultRow from '../catalog/results/PerfumeResultRow.jsx'
+import SortSelect from '../catalog/results/SortSelect.jsx'
 import {
   MAX_PHRASE_LENGTH,
   PHRASE_HINTS,
   getPhraseProblem,
   getSearchPhrase,
   normalizePhrase,
-} from '../catalog/phrase.js'
-import { parseSort, withSort } from '../catalog/sorting.js'
-import { useCatalogFilters } from '../catalog/useCatalogFilters.js'
-import { MAX_PAGE, PAGE_SIZE, usePerfumeSearch } from '../catalog/usePerfumeSearch.js'
+} from '../catalog/results/phrase.js'
+import { parseSort, withSort } from '../catalog/results/sorting.js'
+import { useCatalogFilters } from '../catalog/filters/useCatalogFilters.js'
+import { MAX_PAGE, PAGE_SIZE, usePerfumeSearch } from '../catalog/results/usePerfumeSearch.js'
 
 function parsePage(text) {
   if (text === null || !/^[1-9]\d*$/.test(text)) {

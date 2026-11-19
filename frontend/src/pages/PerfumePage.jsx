@@ -13,12 +13,12 @@ import {
   Title,
 } from '@mantine/core'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
-import AccordBars from '../catalog/AccordBars.jsx'
-import CardSection from '../catalog/CardSection.jsx'
-import { parseId } from '../catalog/filters.js'
-import NotesPyramid from '../catalog/NotesPyramid.jsx'
-import PerfumeHeader from '../catalog/PerfumeHeader.jsx'
-import { usePerfume } from '../catalog/usePerfume.js'
+import AccordBars from '../perfume/AccordBars.jsx'
+import CardSection from '../perfume/CardSection.jsx'
+import { parseId } from '../catalog/filters/filters.js'
+import NotesPyramid from '../perfume/NotesPyramid.jsx'
+import PerfumeHeader from '../perfume/PerfumeHeader.jsx'
+import { usePerfume } from '../perfume/usePerfume.js'
 
 function PerfumeSkeleton() {
   return (

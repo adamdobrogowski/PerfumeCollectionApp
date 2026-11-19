@@ -1,10 +1,10 @@
 import { Badge, Group, Paper, Stack, Text } from '@mantine/core'
 import { Link } from 'react-router'
-import AccordBadge from './AccordBadge.jsx'
-import { GENDER_LABELS, capitalizeFirst } from './labels.js'
-import PerfumeCover from './PerfumeCover.jsx'
+import AccordBadge from '../../shared/perfume/AccordBadge.jsx'
+import { GENDER_LABELS, capitalizeFirst } from '../../shared/perfume/labels.js'
+import PerfumeCover from '../../shared/perfume/PerfumeCover.jsx'
 import classes from './PerfumeResultRow.module.css'
-import Rating from './Rating.jsx'
+import Rating from '../../shared/perfume/Rating.jsx'
 
 // Jeden wynik na liście (cały wiersz to link do karty perfum): okładka, marka, nazwa, płeć, rok i rodzina
 // jako plakietki, kolorowe akordy i ocena.

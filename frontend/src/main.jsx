@@ -16,7 +16,7 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       {/* MantineProvider udostępnia motyw wszystkim komponentom w aplikacji. */}
-      <MantineProvider theme={theme} defaultColorScheme="light">
+      <MantineProvider theme={theme} defaultColorScheme="dark">
         <Notifications />
         {/* BrowserRouter synchronizuje widok z adresem w przeglądarce. */}
         <BrowserRouter>

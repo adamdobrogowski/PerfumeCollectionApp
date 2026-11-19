@@ -1,8 +1,8 @@
 import { Anchor, Badge, Group, Paper, Stack, Text, Title, Tooltip } from '@mantine/core'
 import { Link } from 'react-router'
-import { GENDER_LABELS, capitalizeFirst, capitalizeWords } from './labels.js'
-import PerfumeCover from './PerfumeCover.jsx'
-import Rating from './Rating.jsx'
+import { GENDER_LABELS, capitalizeFirst, capitalizeWords } from '../shared/perfume/labels.js'
+import PerfumeCover from '../shared/perfume/PerfumeCover.jsx'
+import Rating from '../shared/perfume/Rating.jsx'
 
 function PerfumeHeader({ perfume }) {
   const plainBadges = [

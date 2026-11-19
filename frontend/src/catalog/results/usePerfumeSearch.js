@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { searchPerfumes } from '../api/catalog.js'
+import { searchPerfumes } from '../../api/catalog.js'
 
 export const PAGE_SIZE = 20
 

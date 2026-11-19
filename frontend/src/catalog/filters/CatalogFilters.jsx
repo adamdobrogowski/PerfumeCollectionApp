@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Button, Chip, Group, Input, Select, SimpleGrid, Stack } from '@mantine/core'
 import { serializeGenders } from './filters.js'
-import { GENDER_LABELS } from './labels.js'
+import { GENDER_LABELS } from '../../shared/perfume/labels.js'
 
 const GENDER_OPTIONS = Object.entries(GENDER_LABELS).map(([value, label]) => ({
   value,

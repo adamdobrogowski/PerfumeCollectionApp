@@ -1,4 +1,4 @@
-import { getDisplayName } from './names.js'
+import { getDisplayName } from '../../shared/perfume/names.js'
 
 const NAME_SEPARATOR = ' · '
 

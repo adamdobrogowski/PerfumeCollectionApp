@@ -1,4 +1,4 @@
-import { GENDER_LABELS } from './labels.js'
+import { GENDER_LABELS } from '../../shared/perfume/labels.js'
 
 const MAX_INTEGER_ID = 2147483647
 

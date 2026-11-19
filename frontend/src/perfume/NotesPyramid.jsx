@@ -1,6 +1,6 @@
 import { Box, Group, Stack, Text, Tooltip } from '@mantine/core'
 import { Link } from 'react-router'
-import { getDisplayName } from './names.js'
+import { getDisplayName } from '../shared/perfume/names.js'
 import classes from './NotesPyramid.module.css'
 
 const LAYERS = [

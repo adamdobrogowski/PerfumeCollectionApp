@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { fetchAccords, fetchBrands, fetchFamilies, fetchNotes } from '../api/catalog.js'
+import { fetchAccords, fetchBrands, fetchFamilies, fetchNotes } from '../../api/catalog.js'
 
 function useDictionary(name, queryFn, enabled = true) {
   return useQuery({

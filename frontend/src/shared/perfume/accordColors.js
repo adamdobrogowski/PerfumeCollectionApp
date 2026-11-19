@@ -5,8 +5,8 @@ const ACCORD_COLORS = {
   // Drzewne i ziemiste
   woody: '#8B5A2B',
   earthy: '#7A6248',
-  patchouli: '#6B4F3A',
-  oud: '#4A322B',
+  patchouli: '#45723a',
+  oud: '#2e2421',
   clay: '#B47353',
   sand: '#D9C29C',
   mossy: '#4F6B3A',
