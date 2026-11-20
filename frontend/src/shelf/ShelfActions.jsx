@@ -1,10 +1,11 @@
-import { Alert, Button, Group, Menu, Modal, Skeleton, Stack, Text } from '@mantine/core'
-import { useDisclosure } from '@mantine/hooks'
+import { Alert, Button, Group, Menu, Skeleton, Stack, Text } from '@mantine/core'
+import ConfirmModal from '../shared/ConfirmModal.jsx'
+import { useConfirmation } from '../shared/useConfirmation.js'
 import LikeLevelMenu from './LikeLevelMenu.jsx'
+import { REMOVE_CONFIRMATIONS, getDislikeConfirmation } from './shelfConfirmations.js'
 import {
   DEFAULT_LIKE_STRENGTH,
   isWishlistBlocked,
-  needsWishlistConfirmation,
   toState,
   withDisliked,
   withLiked,
@@ -20,7 +21,7 @@ const PLACEMENT_LABELS = { collection: 'W kolekcji', wishlist: 'Lista życzeń' 
 function ShelfActions({ perfumeId }) {
   const { data, isPending, isError, error, refetch } = useShelfEntry(perfumeId)
   const save = useSaveShelfEntry(perfumeId)
-  const [confirmOpened, confirm] = useDisclosure(false)
+  const { ask, modalProps } = useConfirmation()
 
   if (isPending) {
     return <Skeleton height={36} width={360} radius="md" />
@@ -52,17 +53,17 @@ function ShelfActions({ perfumeId }) {
 
   function handleDislikedClick() {
     if (isDisliked) {
-      save.mutate(withoutOpinion(state))
-    } else if (needsWishlistConfirmation(state)) {
-      confirm.open()
+      // Ponowne kliknięcie podświetlonego przycisku usuwa opinię, więc pytamy.
+      ask(REMOVE_CONFIRMATIONS.disliked, () => save.mutate(withoutOpinion(state)))
+      return
+    }
+
+    const confirmation = getDislikeConfirmation(state)
+    if (confirmation) {
+      ask(confirmation, () => save.mutate(withDisliked(state)))
     } else {
       save.mutate(withDisliked(state))
     }
-  }
-
-  function handleConfirmDisliked() {
-    confirm.close()
-    save.mutate(withDisliked(state))
   }
 
   return (
@@ -89,7 +90,11 @@ function ShelfActions({ perfumeId }) {
             {state.placement && (
               <>
                 <Menu.Divider />
-                <Menu.Item onClick={() => save.mutate(withoutPlacement(state))}>Zdejmij z półki</Menu.Item>
+                <Menu.Item
+                  onClick={() => ask(REMOVE_CONFIRMATIONS[state.placement], () => save.mutate(withoutPlacement(state)))}
+                >
+                  Zdejmij z półki
+                </Menu.Item>
               </>
             )}
           </Menu.Dropdown>
@@ -100,7 +105,7 @@ function ShelfActions({ perfumeId }) {
             strength={state.likeStrength}
             disabled={busy}
             onSelect={(strength) => save.mutate(withLiked(state, strength))}
-            onRemove={() => save.mutate(withoutOpinion(state))}
+            onRemove={() => ask(REMOVE_CONFIRMATIONS.liked, () => save.mutate(withoutOpinion(state)))}
           />
         ) : (
           <Button
@@ -123,22 +128,7 @@ function ShelfActions({ perfumeId }) {
           Nie lubię
         </Button>
       </Group>
-
-      <Modal opened={confirmOpened} onClose={confirm.close} title="Przenieść do Nielubianych?" centered>
-        <Stack gap="md">
-          <Text size="sm">
-            Te perfumy są na liście życzeń. Przeniesienie do Nielubianych usunie je z listy życzeń.
-          </Text>
-          <Group justify="flex-end">
-            <Button variant="default" onClick={confirm.close}>
-              Anuluj
-            </Button>
-            <Button color="red" onClick={handleConfirmDisliked}>
-              Przenieś
-            </Button>
-          </Group>
-        </Stack>
-      </Modal>
+      <ConfirmModal {...modalProps} />
     </>
   )
 }

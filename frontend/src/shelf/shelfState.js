@@ -38,10 +38,6 @@ export function withoutPlacement(state) {
   return { ...state, placement: null }
 }
 
-export function needsWishlistConfirmation(state) {
-  return state.placement === 'wishlist'
-}
-
 export function isWishlistBlocked(state) {
   return state.opinion === 'disliked'
 }
