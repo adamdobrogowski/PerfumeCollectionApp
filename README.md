@@ -1,6 +1,6 @@
 # PerfumeCollectionApp
 
-Aplikacja internetowa do zarządzania kolekcją perfum i rekomendacji zapachów (praca inżynierska). Dane perfum pochodzą z Fragrantiki i leżą we wspólnej bazie PostgreSQL (z pgvector) w Supabase. Baza jest już w pełni załadowana, więc do uruchomienia aplikacji wystarczy pobrać kod, mieć plik `.env` i zainstalować zależności.
+Aplikacja internetowa do zarządzania kolekcją perfum i rekomendacji zapachów. Dane perfum pochodzą z portalu Fragrantica i leżą we wspólnej bazie PostgreSQL (z pgvector) w Supabase. Baza jest już w pełni załadowana, więc do uruchomienia aplikacji wystarczy pobrać kod, mieć plik `.env` i zainstalować zależności.
 
 - **Backend:** Node.js, Express 5 (`backend/`), port 8080
 - **Frontend:** React, Vite, Mantine, TanStack Query (`frontend/`), port 5173
