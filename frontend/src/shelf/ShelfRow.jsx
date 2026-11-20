@@ -3,6 +3,9 @@ import { Link } from 'react-router'
 import { GENDER_LABELS, capitalizeFirst } from '../shared/perfume/labels.js'
 import PerfumeCover from '../shared/perfume/PerfumeCover.jsx'
 import LikeLevelMenu from './LikeLevelMenu.jsx'
+import ConfirmModal from '../shared/ConfirmModal.jsx'
+import { useConfirmation } from '../shared/useConfirmation.js'
+import { REMOVE_CONFIRMATIONS } from './shelfConfirmations.js'
 import { withLiked, withoutOpinion, withoutPlacement } from './shelfState.js'
 import { useSaveShelfEntry } from './useSaveShelfEntry.js'
 
@@ -16,6 +19,7 @@ function ShelfRow({ item, sectionId }) {
   const { perfume, entry } = item
   const save = useSaveShelfEntry(perfume.id)
   const busy = save.isPending
+  const { ask, modalProps } = useConfirmation()
 
   const details = [
     GENDER_LABELS[perfume.gender] && capitalizeFirst(GENDER_LABELS[perfume.gender]),
@@ -30,13 +34,18 @@ function ShelfRow({ item, sectionId }) {
         strength={entry.likeStrength}
         disabled={busy}
         onSelect={(strength) => save.mutate(withLiked(entry, strength))}
-        onRemove={() => save.mutate(withoutOpinion(entry))}
+        onRemove={() => ask(REMOVE_CONFIRMATIONS.liked, () => save.mutate(withoutOpinion(entry)))}
       />
     )
   } else {
     const remove = sectionId === 'disliked' ? withoutOpinion : withoutPlacement
     actions = (
-      <Button variant="default" size="sm" disabled={busy} onClick={() => save.mutate(remove(entry))}>
+      <Button
+        variant="default"
+        size="sm"
+        disabled={busy}
+        onClick={() => ask(REMOVE_CONFIRMATIONS[sectionId], () => save.mutate(remove(entry)))}
+      >
         {REMOVE_LABELS[sectionId]}
       </Button>
     )
@@ -70,6 +79,7 @@ function ShelfRow({ item, sectionId }) {
         </Stack>
         <div style={{ flexShrink: 0 }}>{actions}</div>
       </Group>
+      <ConfirmModal {...modalProps} />
     </Paper>
   )
 }
