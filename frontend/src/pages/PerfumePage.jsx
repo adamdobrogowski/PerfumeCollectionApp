@@ -20,6 +20,7 @@ import NotesPyramid from '../perfume/NotesPyramid.jsx'
 import PerfumeHeader from '../perfume/PerfumeHeader.jsx'
 import { usePerfume } from '../perfume/usePerfume.js'
 import ShelfActions from '../shelf/ShelfActions.jsx'
+import NoteSection from '../notes/NoteSection.jsx'
 
 function PerfumeSkeleton() {
   return (
@@ -39,6 +40,11 @@ function PerfumeContent({ perfume }) {
   return (
     <Stack gap="md">
       <PerfumeHeader perfume={perfume} actions={<ShelfActions perfumeId={perfume.id} />} />
+      <CardSection title={`O stylu zapachu: ${subfamily.name}`}>
+        <Text size="sm" c={subfamily.description ? undefined : 'dimmed'}>
+          {subfamily.description ?? 'Brak opisu tej podrodziny.'}
+        </Text>
+      </CardSection>
       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
         <CardSection title="Akordy" hint="Od najbardziej wyczuwalnego. Długość paska pokazuje tylko kolejność.">
           <AccordBars accords={perfume.accords} />
@@ -47,11 +53,7 @@ function PerfumeContent({ perfume }) {
           <NotesPyramid notes={perfume.notes} />
         </CardSection>
       </SimpleGrid>
-      <CardSection title={`O stylu zapachu: ${subfamily.name}`}>
-        <Text size="sm" c={subfamily.description ? undefined : 'dimmed'}>
-          {subfamily.description ?? 'Brak opisu tej podrodziny.'}
-        </Text>
-      </CardSection>
+      <NoteSection perfumeId={perfume.id} />
     </Stack>
   )
 }

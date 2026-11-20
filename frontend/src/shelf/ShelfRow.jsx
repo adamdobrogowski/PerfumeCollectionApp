@@ -61,6 +61,11 @@ function ShelfRow({ item, sectionId }) {
                 {detail}
               </Badge>
             ))}
+            {item.hasNote && (
+              <Badge variant="light" tt="none" fw={400}>
+                Notatka
+              </Badge>
+            )}
           </Group>
         </Stack>
         <div style={{ flexShrink: 0 }}>{actions}</div>
