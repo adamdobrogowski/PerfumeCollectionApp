@@ -1,123 +1,105 @@
 # PerfumeCollectionApp
 
-Aplikacja do rekomendacji perfum. Dane perfum pochodzą z Fragrantiki. Każde perfumy mają wektor zapachowy (512 liczb), należą do jednej z 17 podrodzin i 7 rodzin zapachowych, a całość leży w bazie PostgreSQL (z pgvector) w Supabase.
+Aplikacja internetowa do zarządzania kolekcją perfum i rekomendacji zapachów (praca inżynierska). Dane perfum pochodzą z Fragrantiki i leżą we wspólnej bazie PostgreSQL (z pgvector) w Supabase. Baza jest już w pełni załadowana, więc do uruchomienia aplikacji wystarczy pobrać kod, mieć plik `.env` i zainstalować zależności.
 
-Ten plik opisuje, jak uruchomić projekt **na nowym komputerze**. Najpierw sprawdź, którą ścieżkę potrzebujesz.
+- **Backend:** Node.js, Express 5 (`backend/`), port 8080
+- **Frontend:** React, Vite, Mantine, TanStack Query (`frontend/`), port 5173
+- **Baza:** PostgreSQL w Supabase (wspólna dla całego zespołu)
 
-| Co robisz | Ścieżka |
-|---|---|
-| Piszesz backend lub korzystasz z gotowej bazy | **A** (kilka minut, bez notatników) |
-| Chcesz odtworzyć osadzenia, klastry lub pliki do bazy | **B** (dodatkowo środowisko Pythona i notatniki) |
+## 1. Wymagania
 
-## 1. Co jest w repozytorium, a co trzeba mieć lub wygenerować
+- **Git**
+- **Node.js 20.19 lub nowszy, albo 22.12 lub nowszy** (wymaga tego Vite 8). Sprawdź: `node --version`.
+- **VS Code** (zalecany). Do ręcznego testowania API wygodne jest rozszerzenie *REST Client* (otwiera pliki `.http` z folderu `requests/`).
+- **Plik `.env`** od właściciela projektu (dostajesz go prywatnie, nie ma go w Gicie).
 
-| Element | Skąd go wziąć |
-|---|---|
-| Kod backendu (`backend/`), skrypty SQL (`baza/`), notatniki (`notatniki/`) | jest w repozytorium |
-| Dane źródłowe (`dane/`: `fra_cleaned_final.csv`, słownik nut itd.) | jest w repozytorium |
-| `.env` (dane połączenia z bazą) | **dostajesz prywatnie od właściciela bazy** (nie ma go w Gicie) |
-| `backend/node_modules/` | wygeneruj poleceniem `npm install` |
-| `notatniki/wyniki_embeddingow/` (wektory perfum) | wygeneruj notatnikiem `embeddings.ipynb` (ścieżka B) |
-| `notatniki/wyniki_klasteryzacji/` (klastry, progi) | wygeneruj notatnikiem `clustering.ipynb` (ścieżka B) |
-| `notatniki/baza_import/` (pliki CSV do załadowania do bazy) | wygeneruj notatnikiem `export_DB.ipynb`, komórki 1-6 (ścieżka B) |
-| Baza danych w Supabase | **już załadowana**, niczego nie ładujesz |
-
-Foldery `wyniki_*`, `baza_import` i plik `.env` są celowo ignorowane przez Git (są duże albo tajne).
-
-## 2. Wymagania
-
-- **Git** i **VS Code** (rozszerzenia: *Python* i *Jupyter*, tylko dla ścieżki B).
-- **Node.js** w wersji LTS (20 lub 22). Express 5 wymaga co najmniej 18.
-- **Python 3.12** (tylko ścieżka B). Linux: `python3 --version`, Windows: `py -3.12 --version`.
-- Miejsce na dysku: ścieżka A ok. 100 MB, ścieżka B dodatkowo 1-2 GB (środowisko Pythona) i ok. 200 MB na pliki wynikowe.
-
-## 3. Ścieżka A: backend
+## 2. Uruchomienie krok po kroku
 
 1. Pobierz repozytorium:
    ```
    git clone https://github.com/adamdobrogowski/PerfumeCollectionApp.git
    cd PerfumeCollectionApp
    ```
-2. W **głównym folderze repozytorium** (obok `backend/`, `dane/`) utwórz plik `.env` z danymi od właściciela bazy:
+2. Umieść plik `.env` w **głównym folderze repozytorium** (obok `backend/` i `frontend/`, nie w środku nich). Sprawdź `git status`: plik `.env` **nie może** się tam pojawić.
+
+   Plik zawiera zmienne (wartości bez cudzysłowów i spacji):
    ```
    DB_HOST=...
    DB_PORT=5432
    DB_NAME=postgres
    DB_USER=...
    DB_PASSWORD=...
+   SESSION_SECRET=...
    ```
-   Wpisz wartości bez cudzysłowów i spacji. Sprawdź `git status`: plik `.env` **nie może** się tam pojawić.
-3. Uruchom backend:
+   `SESSION_SECRET` to losowy ciąg do podpisywania sesji. Jeśli w pliku od właściciela go nie ma, wygeneruj własny (dopisz do `.env`):
+   ```
+   node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+   ```
+3. **Backend** (pierwszy terminal):
    ```
    cd backend
    npm install
    npm run dev
    ```
-4. Otwórz w przeglądarce `http://localhost:8080/api/v1/health`. Powinna wyświetlić się odpowiedź z `"status": "ok"`.
+   Sprawdź w przeglądarce:
+   - `http://localhost:8080/api/v1/health` powinno zwrócić `"status": "ok"`,
+   - `http://localhost:8080/api/v1/health/db` powinno zwrócić nazwę bazy, wersję pgvector i liczbę perfum (potwierdza, że `.env` jest dobry).
+4. **Frontend** (drugi terminal, backend musi działać):
+   ```
+   cd frontend
+   npm install
+   npm run dev
+   ```
+   Otwórz adres wypisany przez Vite (zwykle `http://localhost:5173`).
+5. Zarejestruj konto (hasło minimum 12 znaków) i zaloguj się. Baza jest wspólna dla całego zespołu, więc używaj adresu e-mail wyraźnie testowego (np. `imie+test@example.com`).
 
-## 4. Ścieżka B: notatniki
+Gotowe. Do uruchomienia aplikacji nie trzeba niczego generować ani ładować do bazy. Foldery z danymi źródłowymi i analizami (`dane/`, `notatniki/`) nie są potrzebne do jej działania.
 
-### 4.1 Środowisko Pythona (raz)
+## 3. Struktura repozytorium
 
-W głównym folderze repozytorium:
+| Folder lub plik | Zawartość |
+|---|---|
+| `backend/src/` | serwer API: `routes/` (endpointy), `auth/` (logowanie, sesje, walidacja), `catalog/`, `shelf/`, `db.js` (połączenie z bazą), `app.js` (rejestracja routerów) |
+| `frontend/src/` | aplikacja React: `pages/` (strony), `api/` (wywołania API), `auth/`, `layout/`, `catalog/`, `shelf/`, `perfume/`, `shared/` (elementy używane w wielu miejscach) |
+| `baza/` | numerowane skrypty SQL opisujące strukturę bazy (patrz sekcja 5) |
+| `requests/` | pliki `.http` do ręcznego testowania API |
+| `scripts/` | `psql.js`: uruchamia `psql` z danymi z `.env` (dla właściciela bazy) |
+| `.env` | dane dostępowe, tylko lokalnie, **nigdy w Gicie** |
 
-- **Windows (PowerShell):**
-  ```
-  py -3.12 -m venv .venv
-  .\.venv\Scripts\Activate.ps1
-  ```
-  Jeśli PowerShell blokuje skrypt: `Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned`, a potem ponów aktywację.
-- **Linux:**
-  ```
-  python3 -m venv .venv
-  source .venv/bin/activate
-  ```
+Foldery `docs/`, `diagramy/` oraz plik `CLAUDE.md` są poza Gitem (dokumentacja robocza i zasady pracy). Dostajesz je od właściciela projektu.
 
-Następnie (przy aktywnym środowisku, w nawiasie widać `(.venv)`):
+## 4. Codzienna praca
 
-```
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-```
+- **Uruchamianie:** dwa terminale (backend: `npm run dev` w `backend/`, frontend: `npm run dev` w `frontend/`). Oba przeładowują się same po zapisaniu pliku. Frontend przekierowuje zapytania `/api` na `http://localhost:8080` (`frontend/vite.config.js`), więc backend musi działać na porcie 8080.
+- **Testowanie backendu:** pliki w `requests/` (`auth.http`, `catalog.http`, `perfumes.http`, `perfumes_search.http`). Nowe endpointy testuj tak samo, w nowym pliku `.http`.
+- **Kontrola kodu frontendu:** `npm run lint` w `frontend/`. Sprawdzenie produkcyjnego budowania: `npm run build`.
+- **Nowy endpoint:** plik w `backend/src/routes/`, rejestracja w `backend/src/app.js` (stałe ścieżki przed parametrycznymi), walidacja w osobnym pliku (wzór: `shelf/shelf-state.js`). Zapytania do bazy tylko z parametrami `$1, $2...` przez `getPool()`.
+- **Nowa strona frontendu:** plik w `frontend/src/pages/`, trasa w `App.jsx` (zalogowani: grupa `RequireAuth`), wywołania API w `api/`, wzór: moduł półki (`shelf/`, `api/shelf.js`, `pages/ShelfPage.jsx`).
+- **Styl:** kod, nazwy i pliki po angielsku, komentarze po polsku. Backend: 4 spacje i średniki. Frontend: 2 spacje, bez średników.
+- **Git:**
+  - przed pracą `git pull`,
+  - przed commitem `git status` i `git diff`,
+  - do commita dodawaj jawne ścieżki (`git add ścieżka/do/pliku`), nigdy `git add .`,
+  - opisy commitów po polsku,
+  - plik `.env` nigdy nie trafia do Gita.
 
-W VS Code otwórz dowolny notatnik, kliknij **Select Kernel** (prawy górny róg), wybierz **Python Environments** i środowisko **.venv**.
+## 5. Baza danych
 
-### 4.2 Kolejność uruchamiania
-
-Każdy notatnik uruchamiaj od góry do dołu (*Run All* działa), kolejno. Nie zmieniaj folderu roboczego (to `notatniki/`).
-
-| Krok | Notatnik | Co robi | Zapisuje do | Czas |
-|---|---|---|---|---|
-| 1 | `embeddings.ipynb` | liczy wektory perfum | `notatniki/wyniki_embeddingow/` | kilka minut |
-| 2 | `clustering.ipynb` | dzieli perfumy na rodziny i podrodziny, liczy progi | `notatniki/wyniki_klasteryzacji/` | kilka-kilkanaście minut |
-| 3 | `export_DB.ipynb`, **komórki 1-6** | dzieli dane na tabele | `notatniki/baza_import/` | ok. minuty |
-
-Kroków 1-3 nie trzeba powtarzać, jeśli nie zmieniasz osadzeń ani klastrów.
-
-Pozostałe notatniki (nie są potrzebne do uruchomienia aplikacji):
-- `data_cleaning.ipynb`, `data_extraction.ipynb`: czyszczenie danych i listy unikalnych nut/akordów. Wynik (`dane/fra_cleaned_final.csv`) jest już w repozytorium.
-- `embeddings_wstep.ipynb`: badania wstępne do wyboru metody osadzeń (do czytania).
-- `notes_dictionary.ipynb`: słownik nut ogólnych. Wymaga dodatkowo `pip install spacy` oraz `python -m spacy download en_core_web_sm`.
-
-### 4.3 Czego NIE uruchamiać
-
-W `export_DB.ipynb` komórki **8, 9 i 10** (tworzenie tabel, ładowanie danych, indeksy) zmieniają wspólną bazę w Supabase, a komórki 8 i 9 mają ustawione czyszczenie tabel (`RESET_PRZED_TWORZENIEM`, `WYCZYSC_PRZED_LADOWANIEM` = `True`). Uruchomione przez przypadek **skasowałyby dane** i załadowały je od nowa. Dane do bazy ładuje wyłącznie właściciel bazy. Komórka 7 (test połączenia) jest bezpieczna, tylko czyta.
-
-Wyniki wygenerowane u Ciebie mogą się minimalnie różnić od tych w bazie (inne wersje bibliotek lub system), dlatego bazy nie ładujemy z dwóch komputerów.
-
-## 5. Połączenie z bazą
-
-- Baza działa w Supabase (PostgreSQL 17 z rozszerzeniem pgvector), łączymy się przez **Session pooler** (port 5432).
-- Dane połączenia są tylko w pliku `.env`. **Nigdy** nie wklejaj hasła do kodu, notatnika ani wiadomości na czacie, a plik `.env` nie może trafić do Gita.
-- Zmiany struktury bazy robimy wyłącznie przez nowe, numerowane pliki SQL w folderze `baza/` (np. `04_users.sql`), a nie ręcznie w panelu.
+- Baza działa w Supabase (PostgreSQL z pgvector). Łączymy się przez **Session pooler** (port 5432).
+- Dane połączenia są tylko w `.env`. **Nigdy** nie wklejaj hasła do kodu, wiadomości ani czatu z asystentem.
+- Baza jest wspólna, więc zmiany struktury robimy wyłącznie przez nowe, numerowane pliki SQL w `baza/` (kolejny numer po ostatnim). Wykonuje je **tylko właściciel bazy** poleceniem `node scripts/psql.js -v ON_ERROR_STOP=1 -f baza/NN_nazwa.sql` (wymaga zainstalowanego `psql`). Osoby piszące kod nie zmieniają plików w `baza/` i nie edytują bazy ręcznie w panelu. Jeśli czegoś w bazie brakuje, zgłoś to właścicielowi.
+- Konta i dane tworzone podczas testów trafiają do wspólnej bazy, więc nie usuwaj ani nie zmieniaj cudzych kont.
 
 ## 6. Najczęstsze problemy
 
 | Objaw | Przyczyna i rozwiązanie |
 |---|---|
-| `KeyError: 'DB_HOST'` w notatniku | notatnik nie widzi `.env`: plik musi leżeć w głównym folderze repozytorium |
+| backend kończy się komunikatem `SESSION_SECRET nie jest ustawiony w pliku .env` | brak `SESSION_SECRET` w `.env` (patrz krok 2) |
+| `Brakujące zmienne środowiskowe: DB_...` | `.env` leży w złym miejscu (musi być w głównym folderze repozytorium) albo brakuje zmiennej |
 | `password authentication failed` | błędne hasło w `.env` |
 | `Tenant or user not found` | błędny `DB_USER` (ma postać `postgres.IDENTYFIKATOR`) albo `DB_HOST` |
-| `ModuleNotFoundError` w notatniku | wybrano zły kernel (nie `.venv`) lub nie zainstalowano `requirements.txt` |
-| `brak plikow wejsciowych` w `export_DB` | najpierw uruchom `embeddings.ipynb` i `clustering.ipynb` |
-| `npm run dev` nie działa | sprawdź `node --version` (potrzebne co najmniej 18) i czy jesteś w folderze `backend/` |
+| `/api/v1/health` działa, a `/api/v1/health/db` zwraca błąd 503 | backend nie łączy się z bazą: sprawdź zmienne `DB_*` w `.env` |
+| `npm run dev` we frontendzie: komunikat o wersji Node | potrzebny Node 20.19+ lub 22.12+ (`node --version`) |
+| w przeglądarce ekran „Spróbuj ponownie” zaraz po wejściu | backend nie działa albo nie ma połączenia z bazą: sprawdź `/api/v1/health/db` |
+| `EADDRINUSE` na porcie 8080 | inny proces zajmuje port (często drugi uruchomiony backend): zamknij go |
+| `npm run dev` w backendzie nie działa | jesteś w złym folderze (musi być `backend/`) lub nie wykonano `npm install` |
