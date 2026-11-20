@@ -1,5 +1,7 @@
 import { Button, Group, SegmentedControl, Stack, Text, Textarea } from '@mantine/core'
 import { useForm } from '@mantine/form'
+import ConfirmModal from '../shared/ConfirmModal.jsx'
+import { useConfirmation } from '../shared/useConfirmation.js'
 import {
   LEVEL_LABELS,
   LEVEL_OPTIONS,
@@ -10,6 +12,12 @@ import {
   levelToControl,
 } from './noteRules.js'
 import { useSaveNote } from './useSaveNote.js'
+
+const DISCARD_CONFIRMATION = {
+  title: 'Odrzucić zmiany?',
+  message: 'Wprowadzone zmiany w notatce nie zostaną zapisane.',
+  confirmLabel: 'Odrzuć',
+}
 
 function LevelField({ label, value, onChange }) {
   return (
@@ -33,6 +41,7 @@ function LevelField({ label, value, onChange }) {
 
 function NoteForm({ perfumeId, initialNote, onClose }) {
   const save = useSaveNote(perfumeId)
+  const { ask, modalProps } = useConfirmation()
 
   const form = useForm({
     initialValues: {
@@ -47,6 +56,14 @@ function NoteForm({ perfumeId, initialNote, onClose }) {
 
   function handleSubmit(values) {
     save.mutate(values, { onSuccess: onClose })
+  }
+
+  function handleCancel() {
+    if (form.isDirty()) {
+      ask(DISCARD_CONFIRMATION, onClose)
+    } else {
+      onClose()
+    }
   }
 
   return (
@@ -78,11 +95,12 @@ function NoteForm({ perfumeId, initialNote, onClose }) {
           <Button type="submit" loading={save.isPending}>
             Zapisz
           </Button>
-          <Button variant="default" disabled={save.isPending} onClick={onClose}>
+          <Button variant="default" disabled={save.isPending} onClick={handleCancel}>
             Anuluj
           </Button>
         </Group>
       </Stack>
+    <ConfirmModal {...modalProps} />
     </form>
   )
 }
