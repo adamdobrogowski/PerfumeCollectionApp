@@ -16,7 +16,9 @@ router.get('/', async (req, res) => {
             `SELECT p.perfume_id, p.name, p.gender, p.release_year,
                     b.brand_id, b.name AS brand_name,
                     f.cluster_id AS family_id, f.name AS family_name,
-                    se.opinion, se.like_strength, se.placement
+                    se.opinion, se.like_strength, se.placement,
+                    EXISTS (SELECT 1 FROM user_perfume_notes n
+                            WHERE n.user_id = se.user_id AND n.perfume_id = se.perfume_id) AS has_note
              FROM shelf_entries se
              JOIN perfumes p  ON p.perfume_id = se.perfume_id
              JOIN brands b    ON b.brand_id = p.brand_id
@@ -37,6 +39,7 @@ router.get('/', async (req, res) => {
                     family: { id: row.family_id, name: row.family_name },
                 },
                 entry: toEntry(row),
+                hasNote: row.has_note,
             })),
         });
     } catch (err) {

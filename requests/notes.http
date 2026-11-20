@@ -1,0 +1,117 @@
+@baseUrl = http://localhost:8080/api/v1
+
+### 1. Logowanie (konto test3): oczekuję 200 i ciasteczka perfume.sid
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test5@example.com",
+  "password": "Przykladowe-haslo-123"
+}
+
+
+### 2. Przygotowanie: perfumy 1 na półce jako Lubiane (siła 2): oczekuję 200
+PUT {{baseUrl}}/shelf/1
+Content-Type: application/json
+
+{ "opinion": "liked", "likeStrength": 2, "placement": null }
+
+
+### 3. Notatka, której jeszcze nie ma: oczekuję 200 i { "note": null }
+# Jeśli notatka do perfum 1 już istnieje (z wcześniejszych prób), usuń ją żądaniem 15 i ponów.
+GET {{baseUrl}}/perfume-notes/1
+
+
+### 4. Zapis notatki: oczekuję 200, body, longevity 4, projection 2 i updatedAt
+PUT {{baseUrl}}/perfume-notes/1
+Content-Type: application/json
+
+{ "body": "Świeży początek, po godzinie robi się pudrowy.", "longevity": 4, "projection": 2 }
+
+
+### 5. Odczyt zapisanej notatki: oczekuję 200 z tą samą treścią
+GET {{baseUrl}}/perfume-notes/1
+
+
+### 6. Znacznik w liście półki: oczekuję 200, a przy perfumach 1 pole "hasNote": true (po kroku 4 z tego pliku)
+GET {{baseUrl}}/shelf
+
+
+### 7. Zastąpienie notatki bez ocen: oczekuję 200, longevity i projection równe null
+PUT {{baseUrl}}/perfume-notes/1
+Content-Type: application/json
+
+{ "body": "Nowa treść bez ocen." }
+
+
+### 8. Pusta treść (same spacje): oczekuję 400 "Treść notatki nie może być pusta."
+PUT {{baseUrl}}/perfume-notes/1
+Content-Type: application/json
+
+{ "body": "   " }
+
+
+### 9. Brak pola body: oczekuję 400 "Podaj treść notatki."
+PUT {{baseUrl}}/perfume-notes/1
+Content-Type: application/json
+
+{ "longevity": 3 }
+
+
+### 10. Ocena poza zakresem: oczekuję 400 "Trwałość musi być liczbą całkowitą od 1 do 5."
+PUT {{baseUrl}}/perfume-notes/1
+Content-Type: application/json
+
+{ "body": "x", "longevity": 6 }
+
+
+### 11. Ocena jako tekst: oczekuję 400
+PUT {{baseUrl}}/perfume-notes/1
+Content-Type: application/json
+
+{ "body": "x", "projection": "3" }
+
+
+### 12. Notatka do perfum spoza półki (id poprawne, ale nieistniejące na półce): oczekuję 409 "Notatkę można dodać tylko do perfum z półki."
+PUT {{baseUrl}}/perfume-notes/2000000000
+Content-Type: application/json
+
+{ "body": "x" }
+
+
+### 13. Id nie jest liczbą: oczekuję 400 "Nieprawidłowy identyfikator perfum."
+GET {{baseUrl}}/perfume-notes/abc
+
+
+### 14. Notatka zostaje po usunięciu perfum z półki: najpierw usuwam wpis z półki, oczekuję 200
+PUT {{baseUrl}}/shelf/1
+Content-Type: application/json
+
+{ "opinion": null, "likeStrength": null, "placement": null }
+
+
+### 14b. Odczyt po usunięciu z półki: oczekuję 200 i nadal notatki (z kroku 7)
+GET {{baseUrl}}/perfume-notes/1
+
+
+### 14c. Zapis po usunięciu z półki: oczekuję 409
+PUT {{baseUrl}}/perfume-notes/1
+Content-Type: application/json
+
+{ "body": "x" }
+
+
+### 15. Usunięcie notatki: oczekuję 204
+DELETE {{baseUrl}}/perfume-notes/1
+
+
+### 15b. Ponowne usunięcie (idempotentne): oczekuję 204
+DELETE {{baseUrl}}/perfume-notes/1
+
+
+### 16. Wylogowanie: oczekuję 204
+POST {{baseUrl}}/auth/logout
+
+
+### 17. Bez sesji: oczekuję 401 "Nie jesteś zalogowany."
+GET {{baseUrl}}/perfume-notes/1
