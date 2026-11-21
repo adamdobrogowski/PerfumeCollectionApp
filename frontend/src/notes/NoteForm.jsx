@@ -100,7 +100,7 @@ function NoteForm({ perfumeId, initialNote, onClose }) {
           </Button>
         </Group>
       </Stack>
-    <ConfirmModal {...modalProps} />
+      <ConfirmModal {...modalProps} />
     </form>
   )
 }
