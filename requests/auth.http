@@ -4,23 +4,25 @@
 ### 1. Zdrowie serwera: oczekuję 200
 GET {{baseUrl}}/health
 
-### 2. Rejestracja ze złymi danymi: oczekuję 400 i polami "fields" z błędami dla email i password
+### 2. Rejestracja ze złymi danymi: oczekuję 400 i polami "fields" z błędami dla email, password i displayName
 POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
   "email": "zly-adres",
-  "password": "krotkie"
+  "password": "krotkie",
+  "displayName": "ab"
 }
 
 ### 3. Rejestracja poprawna: oczekuję 201 i ciasteczka perfume.sid (HttpOnly, SameSite=Lax)
-# UWAGA: tworzy konto we wspólnej bazie. Drugie wysłanie tego samego adresu da 409.
+# UWAGA: tworzy konto we wspólnej bazie. Drugie wysłanie tego samego adresu lub nicku da 409.
 POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
   "email": "test5@example.com",
-  "password": "Przykladowe-haslo-123"
+  "password": "Przykladowe-haslo-123",
+  "displayName": "test5_nick"
 }
 
 ### 4. Logowanie poprawne: oczekuję 200 i ciasteczka perfume.sid
@@ -148,3 +150,63 @@ GET {{baseUrl}}/nieistnieje
 
 ### 27. Adres główny serwera: oczekuję 404 w JSON
 GET http://localhost:8080/
+
+### 28. Rejestracja (Etap 1) - poprawna z nowym nickiem: oczekuję 201
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick1@example.com",
+  "password": "Przykladowe-haslo-123",
+  "displayName": "Perfumiarz_Test1"
+}
+
+### 29. Rejestracja - ten sam nick inną wielkością liter: oczekuję 409 i fields.displayName (oraz rollback konta w users)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick2@example.com",
+  "password": "Przykladowe-haslo-123",
+  "displayName": "perfumiarz_test1"
+}
+
+### 30. Rejestracja - nick za krótki: oczekuję 400 i fields.displayName
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick3@example.com",
+  "password": "Przykladowe-haslo-123",
+  "displayName": "ab"
+}
+
+### 31. Rejestracja - nick ze spacją: oczekuję 400 i fields.displayName
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick4@example.com",
+  "password": "Przykladowe-haslo-123",
+  "displayName": "jan kowalski"
+}
+
+### 32. Rejestracja - nick z polskim znakiem: oczekuję 400 i fields.displayName
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick5@example.com",
+  "password": "Przykladowe-haslo-123",
+  "displayName": "żółw_123"
+}
+
+### 33. Rejestracja - zajęty e-mail z poprawnym nowym nickiem: oczekuję 409 i fields.email
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick1@example.com",
+  "password": "Przykladowe-haslo-123",
+  "displayName": "WolnyNick_99"
+}

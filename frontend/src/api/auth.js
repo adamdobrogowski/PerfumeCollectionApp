@@ -23,7 +23,7 @@ export function logout() {
 }
 
 // Backend od razu loguje nowego użytkownika. Zwraca { userId, email, role }.
-// Błędy walidacji (400) mają pole fields z komunikatami dla pól, zajęty e-mail to 409.
-export function register(email, password) {
-  return apiFetch('/auth/register', { method: 'POST', body: { email, password } })
+// Błędy walidacji (400) i zajęte pola (409) mają obiekt fields z komunikatami dla pól.
+export function register(email, password, displayName) {
+  return apiFetch('/auth/register', { method: 'POST', body: { email, password, displayName } })
 }

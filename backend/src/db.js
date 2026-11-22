@@ -2,7 +2,7 @@ const path = require('path');
 const { Pool } = require('pg');
 
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env'), quiet: true });
-const WYMAGANE = ['DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME'];   
+const WYMAGANE = ['DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME'];
 
 let pool = null;
 
@@ -14,7 +14,6 @@ function getPool() {
     if (brakujace.length > 0) {
         throw new Error(`Brakujące zmienne środowiskowe: ${brakujace.join(', ')}`);
     }
-
 
     pool = new Pool({
         host: process.env.DB_HOST,
@@ -31,13 +30,31 @@ function getPool() {
         options: '-c search_path=public,extensions',
     });
 
-
     pool.on('error', (err) => {
         console.error('Błąd w puli połączeń z bazą danych:', err.message);
     });
 
-
     return pool;
 }
 
-module.exports = { getPool };
+// Wykonuje przekazane operacje w jednej transakcji na tym samym połączeniu i zawsze zwalnia klienta.
+async function withTransaction(fn) {
+    const client = await getPool().connect();
+    try {
+        await client.query('BEGIN');
+        const result = await fn(client);
+        await client.query('COMMIT');
+        return result;
+    } catch (err) {
+        try {
+            await client.query('ROLLBACK');
+        } catch (rollbackErr) {
+            console.error('Błąd wycofywania transakcji:', rollbackErr.message);
+        }
+        throw err;
+    } finally {
+        client.release();
+    }
+}
+
+module.exports = { getPool, withTransaction };

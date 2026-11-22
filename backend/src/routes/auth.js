@@ -1,10 +1,11 @@
 const express = require('express');
-const { getPool } = require('../db');
+const { getPool, withTransaction } = require('../db');
 const { hashPassword, verifyPassword, verifyDummyPassword } = require('../auth/password');
 const { validateRegistration, validateLogin, validatePasswordChange, validateDeleteAccount } = require('../auth/validation');
 const { loginUser, SESSION_COOKIE_NAME } = require('../auth/session');
 const { authLimiter } = require('../auth/rate-limit');
 const { requireAuth, requireAdmin } = require('../auth/middleware');
+
 
 const router = express.Router();
 
@@ -21,15 +22,29 @@ router.post('/register', authLimiter, async (req, res) => {
     }
 
     try {
+        // Hashowanie wykonujemy przed transakcją, aby nie blokować połączenia z bazą.
         const passwordHash = await hashPassword(value.password);
-        const result = await getPool().query(
-            `INSERT INTO users (email, password_hash)
-             VALUES ($1, $2)
-             RETURNING user_id, email, role`,
-            [value.email, passwordHash]
-        );
-        const user = result.rows[0];
 
+        // Konto i profil powstają razem w jednej transakcji albo wcale.
+        const user = await withTransaction(async (client) => {
+            const result = await client.query(
+                `INSERT INTO users (email, password_hash)
+                 VALUES ($1, $2)
+                 RETURNING user_id, email, role`,
+                [value.email, passwordHash]
+            );
+            const createdUser = result.rows[0];
+
+            await client.query(
+                `INSERT INTO user_profiles (user_id, display_name)
+                 VALUES ($1, $2)`,
+                [createdUser.user_id, value.displayName]
+            );
+
+            return createdUser;
+        });
+
+        // Sesję zakładamy dopiero po zatwierdzeniu transakcji.
         await loginUser(req, user.user_id);
 
         return res.status(201).json({
@@ -42,6 +57,14 @@ router.post('/register', authLimiter, async (req, res) => {
             return res.status(409).json({
                 status: 'error',
                 message: 'Ten adres e-mail jest już zarejestrowany.',
+                fields: { email: 'Ten adres e-mail jest już zarejestrowany.' },
+            });
+        }
+        if (err.code === UNIQUE_VIOLATION_CODE && err.constraint === 'user_profiles_display_name_key') {
+            return res.status(409).json({
+                status: 'error',
+                message: 'Ten nick jest już zajęty.',
+                fields: { displayName: 'Ten nick jest już zajęty.' },
             });
         }
         console.error('Błąd rejestracji:', err.message);

@@ -8,10 +8,13 @@ import { CURRENT_USER_KEY } from '../auth/useCurrentUser.js'
 // Te same granice co w walidacji backendu (backend/src/auth/validation.js).
 const PASSWORD_MIN_LENGTH = 12
 const PASSWORD_MAX_LENGTH = 128
+const DISPLAY_NAME_MIN_LENGTH = 3
+const DISPLAY_NAME_MAX_LENGTH = 30
+const DISPLAY_NAME_PATTERN = /^[A-Za-z0-9_.-]+$/
 
-// Błędy 400 (z polami) i 409 (zajęty e-mail) pokazujemy przy polach, pozostałe w ramce nad formularzem.
+// Błędy 400 i 409 z obiektem fields pokazujemy przy polach, pozostałe w ramce nad formularzem.
 function isFieldError(error) {
-  return (error.status === 400 && error.fields !== null) || error.status === 409
+  return (error.status === 400 || error.status === 409) && error.fields !== null
 }
 
 function RegisterPage() {
@@ -20,8 +23,18 @@ function RegisterPage() {
   // Walidacja po stronie przeglądarki tylko przyspiesza informację o błędzie. Decyduje backend.
   const form = useForm({
     mode: 'uncontrolled',
-    initialValues: { email: '', password: '' },
+    initialValues: { displayName: '', email: '', password: '' },
     validate: {
+      displayName: (value) => {
+        const length = Array.from(value).length
+        if (length < DISPLAY_NAME_MIN_LENGTH || length > DISPLAY_NAME_MAX_LENGTH) {
+          return `Nick musi mieć od ${DISPLAY_NAME_MIN_LENGTH} do ${DISPLAY_NAME_MAX_LENGTH} znaków.`
+        }
+        if (!DISPLAY_NAME_PATTERN.test(value)) {
+          return 'Nick może zawierać tylko litery bez polskich znaków, cyfry oraz znaki _ . - (bez spacji).'
+        }
+        return null
+      },
       email: (value) => (/^\S+@\S+\.\S+$/.test(value.trim()) ? null : 'Podaj poprawny adres e-mail.'),
       password: (value) => {
         const length = Array.from(value).length
@@ -33,14 +46,12 @@ function RegisterPage() {
   })
 
   const registerMutation = useMutation({
-    mutationFn: ({ email, password }) => register(email, password),
+    mutationFn: ({ email, password, displayName }) => register(email, password, displayName),
     // Zapisanie użytkownika w pamięci wystarcza: RequireGuest zauważy zmianę i przekieruje dalej.
     onSuccess: (user) => queryClient.setQueryData(CURRENT_USER_KEY, user),
     onError: (error) => {
-      if (error.status === 400 && error.fields) {
+      if ((error.status === 400 || error.status === 409) && error.fields) {
         form.setErrors(error.fields)
-      } else if (error.status === 409) {
-        form.setFieldError('email', error.message)
       }
     },
   })
@@ -55,6 +66,13 @@ function RegisterPage() {
           <form onSubmit={form.onSubmit((values) => registerMutation.mutate(values))}>
             <Stack gap="md">
               {error && !isFieldError(error) && <Alert color="red">{error.message}</Alert>}
+              <TextInput
+                label="Nick"
+                description={`${DISPLAY_NAME_MIN_LENGTH}–${DISPLAY_NAME_MAX_LENGTH} znaków: litery bez polskich znaków, cyfry oraz _ . -`}
+                autoComplete="username"
+                key={form.key('displayName')}
+                {...form.getInputProps('displayName')}
+              />
               <TextInput
                 label="Adres e-mail"
                 autoComplete="email"
