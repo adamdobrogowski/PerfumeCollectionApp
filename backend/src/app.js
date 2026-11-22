@@ -7,6 +7,7 @@ const perfumeRoutes = require("./routes/perfumes");
 const catalogRoutes = require("./routes/catalog");
 const shelfRoutes = require("./routes/shelf");
 const perfumeNotesRoutes = require("./routes/perfume-notes");
+const discoverRoutes = require("./routes/discover");
 
 const app = express();
 app.use(helmet());
@@ -18,6 +19,7 @@ app.use("/api/v1/perfumes", perfumeRoutes);
 app.use("/api/v1/shelf", shelfRoutes);
 app.use("/api/v1/perfume-notes", perfumeNotesRoutes);
 app.use("/api/v1", catalogRoutes);
+app.use("/api/v1/discover", discoverRoutes);
 
 app.get("/api/v1/health", (req, res) => {
   res.status(200).json({

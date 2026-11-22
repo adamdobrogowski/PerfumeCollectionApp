@@ -1,0 +1,23 @@
+@baseUrl = http://localhost:8080/api/v1
+
+# Tymczasowa trasa do sprawdzenia centrów zainteresowania. Zaloguj się kontem, które ma Lubiane perfumy
+# (w razie potrzeby zmień email i hasło w kroku 1).
+
+### 1. Logowanie: oczekuję 200 i ciasteczka perfume.sid
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "konto04321@gmail.com",
+  "password": "haslo1234567"
+}
+
+
+### 2. Centra: oczekuję 200, likedTotal = liczba Lubianych na półce, centres od największego weightSum
+GET {{baseUrl}}/discover/centres
+
+### 3. Wylogowanie: oczekuję 204
+POST {{baseUrl}}/auth/logout
+
+### 4. Centra bez logowania: oczekuję 401 i "Nie jesteś zalogowany."
+GET {{baseUrl}}/discover/centres
