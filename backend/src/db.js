@@ -28,16 +28,14 @@ function getPool() {
         max: 5,
         connectionTimeoutMillis: 10000,
         idleTimeoutMillis: 30000,
-        
+        options: '-c search_path=public,extensions',
     });
+
 
     pool.on('error', (err) => {
         console.error('Błąd w puli połączeń z bazą danych:', err.message);
     });
 
-    pool.on("connect", (client) => {
-        client.query("SET search_path TO public, extensions");
-    });
 
     return pool;
 }
