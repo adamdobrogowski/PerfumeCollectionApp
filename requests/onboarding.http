@@ -1,0 +1,129 @@
+@baseUrl = http://localhost:8080/api/v1
+
+# Onboarding (jednorazowy zapis Lubianych i Nielubianych perfum).
+# WAZNE: migracja 14 oznaczyla wszystkie ISTNIEJACE konta jako po onboardingu, wiec na starym koncie
+# dostaniesz 409. Test robimy na swiezo zarejestrowanym koncie (krok 1).
+# UWAGA: krok 1 tworzy konto we wspolnej bazie; przy ponownym uruchomieniu zmien email i nick.
+# Identyfikatory perfum ponizej musza istniec w katalogu (1, 20911 i 5965 znamy z testow Blind Buy Guard;
+# @dislikedId sprawdz zapytaniem GET {{baseUrl}}/perfumes/{{dislikedId}}).
+@likedA = 1
+@likedB = 20911
+@likedC = 5965
+@dislikedId = 2
+
+### 1. Rejestracja swiezego konta: oczekuje 201 i ciasteczka perfume.sid
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "onboarding-test1@example.com",
+  "password": "Przykladowe-haslo-123",
+  "displayName": "onboarding_test1"
+}
+
+### 1b. Kim jestem na swiezym koncie: oczekuje 200 i onboardingCompleted = false
+GET {{baseUrl}}/auth/me
+
+### 2. Brak ciala zadania: oczekuje 400 i komunikatu o niepoprawnych danych
+POST {{baseUrl}}/onboarding
+
+### 3. Za malo Lubianych (2 zamiast min. 3): oczekuje 400
+POST {{baseUrl}}/onboarding
+Content-Type: application/json
+
+{
+  "liked": [
+    { "perfumeId": {{likedA}}, "likeStrength": 3 },
+    { "perfumeId": {{likedB}}, "likeStrength": 2 }
+  ],
+  "disliked": [{{dislikedId}}]
+}
+
+### 4. Te same perfumy jako Lubiane i Nielubiane: oczekuje 400
+POST {{baseUrl}}/onboarding
+Content-Type: application/json
+
+{
+  "liked": [
+    { "perfumeId": {{likedA}}, "likeStrength": 3 },
+    { "perfumeId": {{likedB}}, "likeStrength": 2 },
+    { "perfumeId": {{likedC}}, "likeStrength": 1 }
+  ],
+  "disliked": [{{likedA}}]
+}
+
+### 5. Nieistniejace perfumy: oczekuje 404 i "Nie znaleziono części wskazanych perfum."
+# Nic sie nie zapisuje (transakcja wycofana), wiec krok 6 nadal zadziala.
+POST {{baseUrl}}/onboarding
+Content-Type: application/json
+
+{
+  "liked": [
+    { "perfumeId": {{likedA}}, "likeStrength": 3 },
+    { "perfumeId": {{likedB}}, "likeStrength": 2 },
+    { "perfumeId": 2147483647, "likeStrength": 1 }
+  ],
+  "disliked": [{{dislikedId}}]
+}
+
+### 6. Polka po nieudanym kroku 5: oczekuje 200 i pustej listy (nic sie nie zapisalo)
+GET {{baseUrl}}/shelf
+
+### 7. Poprawny zapis: oczekuje 200 i { "onboardingCompleted": true }
+POST {{baseUrl}}/onboarding
+Content-Type: application/json
+
+{
+  "liked": [
+    { "perfumeId": {{likedA}}, "likeStrength": 3 },
+    { "perfumeId": {{likedB}}, "likeStrength": 2 },
+    { "perfumeId": {{likedC}}, "likeStrength": 1 }
+  ],
+  "disliked": [{{dislikedId}}]
+}
+
+### 7b. Kim jestem po onboardingu: oczekuje 200 i onboardingCompleted = true
+GET {{baseUrl}}/auth/me
+
+### 8. Polka po zapisie: oczekuje 3 wpisow liked (z silami 3, 2, 1) i 1 wpisu disliked bez sily
+GET {{baseUrl}}/shelf
+
+### 9. Ponowne wyslanie: oczekuje 409 i "Onboarding został już ukończony."
+POST {{baseUrl}}/onboarding
+Content-Type: application/json
+
+{
+  "liked": [
+    { "perfumeId": {{likedA}}, "likeStrength": 3 },
+    { "perfumeId": {{likedB}}, "likeStrength": 2 },
+    { "perfumeId": {{likedC}}, "likeStrength": 1 }
+  ],
+  "disliked": [{{dislikedId}}]
+}
+
+### 10. Wylogowanie i proba bez sesji: oczekuje 204, potem 401
+POST {{baseUrl}}/auth/logout
+
+###
+POST {{baseUrl}}/onboarding
+Content-Type: application/json
+
+{ "liked": [], "disliked": [] }
+
+
+### 10. Sprzatanie: usuniecie konta testowego: oczekuje 204 i wyczyszczonego ciasteczka
+# Kasuje tez profil i polke (ON DELETE CASCADE), wiec cale testy mozna potem powtorzyc od kroku 1
+# na tym samym emailu i nicku.
+POST {{baseUrl}}/auth/delete-account
+Content-Type: application/json
+
+{ "password": "Przykladowe-haslo-123" }
+
+### 11. /me po usunieciu: oczekuje 401
+GET {{baseUrl}}/auth/me
+
+### 12. Onboarding bez sesji: oczekuje 401 i "Nie jesteś zalogowany."
+POST {{baseUrl}}/onboarding
+Content-Type: application/json
+
+{ "liked": [], "disliked": [] }

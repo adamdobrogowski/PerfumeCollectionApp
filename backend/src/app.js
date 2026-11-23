@@ -9,6 +9,7 @@ const shelfRoutes = require("./routes/shelf");
 const perfumeNotesRoutes = require("./routes/perfume-notes");
 const discoverRoutes = require("./routes/discover");
 const blindBuyCheckRoutes = require("./routes/blind-buy-check");
+const onboardingRoutes = require("./routes/onboarding");
 
 const app = express();
 app.use(helmet());
@@ -22,6 +23,7 @@ app.use("/api/v1/perfume-notes", perfumeNotesRoutes);
 app.use("/api/v1", catalogRoutes);
 app.use("/api/v1/discover", discoverRoutes);
 app.use("/api/v1/perfumes", blindBuyCheckRoutes);
+app.use("/api/v1/onboarding", onboardingRoutes);
 
 app.get("/api/v1/health", (req, res) => {
   res.status(200).json({
