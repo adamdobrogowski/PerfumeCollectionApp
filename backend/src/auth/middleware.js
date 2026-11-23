@@ -11,8 +11,13 @@ async function requireAuth(req, res, next) {
 
     let user;
     try {
+        // LEFT JOIN, zeby brak wiersza profilu nie wylogowywal uzytkownika (profil powstaje razem z kontem).
         const result = await getPool().query(
-            'SELECT user_id, email, role, blocked_at FROM users WHERE user_id = $1',
+            `SELECT u.user_id, u.email, u.role, u.blocked_at,
+                    (p.onboarding_completed_at IS NOT NULL) AS onboarding_completed
+               FROM users u
+               LEFT JOIN user_profiles p ON p.user_id = u.user_id
+              WHERE u.user_id = $1`,
             [userId]
         );
         user = result.rows[0];
@@ -28,8 +33,12 @@ async function requireAuth(req, res, next) {
         });
     }
 
-    req.user = { userId: user.user_id, email: user.email, role: user.role };
-    return next();
+    req.user = {
+        userId: user.user_id,
+        email: user.email,
+        role: user.role,
+        onboardingCompleted: user.onboarding_completed,
+    };    return next();
 }
 
 function checkAdminRole(req, res, next) {
