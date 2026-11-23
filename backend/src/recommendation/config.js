@@ -16,6 +16,12 @@ const DISCOVER_PER_SECTION = 30;
 // zostanie przypisana do innej sekcji (perfuma trafia tam, gdzie jest najblizej centrum).
 const DISCOVER_OVERFETCH_FACTOR = 3;
 
+// Onboarding: ile perfum uzytkownik musi wskazac (minimum z dokumentacji) i ile najwyzej w jednym zadaniu.
+const ONBOARDING_MIN_LIKED = 3;
+const ONBOARDING_MIN_DISLIKED = 1;
+const ONBOARDING_MAX_LIKED = 20;
+const ONBOARDING_MAX_DISLIKED = 20;
+
 module.exports = {
     MIN_LIKED_FOR_RELIABLE_CENTRE,
     VERY_CLOSE_COSINE,
@@ -23,4 +29,8 @@ module.exports = {
     DISCOVER_MAX_SECTIONS,
     DISCOVER_PER_SECTION,
     DISCOVER_OVERFETCH_FACTOR,
+    ONBOARDING_MIN_LIKED,
+    ONBOARDING_MIN_DISLIKED,
+    ONBOARDING_MAX_LIKED,
+    ONBOARDING_MAX_DISLIKED,
 };
