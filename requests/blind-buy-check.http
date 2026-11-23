@@ -1,0 +1,66 @@
+@baseUrl = http://localhost:8080/api/v1
+
+# Blind Buy Guard (ocena perfum przed dodaniem do listy zyczen).
+# Zaloguj sie kontem, ktore ma Lubiane perfumy (w razie potrzeby zmien email i haslo w kroku 1).
+# Identyfikatory ponizej zmien na takie, ktorych NIE masz na polce (sprawdz w kroku 2),
+# oprocz @likedId, ktory ma byc Lubiany z Twojej polki.
+@candidateA = 20911
+@candidateB = 5965
+@likedId = 1
+@dislikeTestId = 5965
+
+### 1. Logowanie: oczekuje 200 i ciasteczka perfume.sid
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "konto04321@gmail.com",
+  "password": "haslo1234567"
+}
+
+### 2. Polka: sprawdz, ktore perfumy masz i jakie sa Lubiane (opinion = liked)
+GET {{baseUrl}}/shelf
+
+### 3. Ocena kandydata A: oczekuje 200 i pol state, level, confidence, nearestLiked, family, subfamily, dislikeWarning, capped (bez cosinusow)
+GET {{baseUrl}}/perfumes/{{candidateA}}/blind-buy-check
+
+### 4. Ocena kandydata B: oczekuje 200, inne perfumy moga dac inny stan lub poziom
+GET {{baseUrl}}/perfumes/{{candidateB}}/blind-buy-check
+
+### 5. Perfumy juz Lubiane: oczekuje 200, state = already_liked, level = null, nearestLiked = null
+GET {{baseUrl}}/perfumes/{{likedId}}/blind-buy-check
+
+### 6. Zly identyfikator: oczekuje 400 i "Nieprawidłowy identyfikator perfum."
+GET {{baseUrl}}/perfumes/abc/blind-buy-check
+
+### 7. Nieistniejace perfumy: oczekuje 404 i "Nie znaleziono perfum."
+GET {{baseUrl}}/perfumes/2147483647/blind-buy-check
+
+### 8a. Oznacz perfumy jako Nielubiane (tylko jesli @dislikeTestId nie jest na Twojej polce): oczekuje 200
+PUT {{baseUrl}}/shelf/{{dislikeTestId}}
+Content-Type: application/json
+
+{
+  "opinion": "disliked",
+  "likeStrength": null,
+  "placement": null
+}
+
+### 8b. Ocena Nielubianych: oczekuje 409 i "Nielubianych perfum nie można dodać do listy życzeń."
+GET {{baseUrl}}/perfumes/{{dislikeTestId}}/blind-buy-check
+
+### 8c. Sprzatanie: usun wpis z polki, oczekuje 200 i entry = null
+PUT {{baseUrl}}/shelf/{{dislikeTestId}}
+Content-Type: application/json
+
+{
+  "opinion": null,
+  "likeStrength": null,
+  "placement": null
+}
+
+### 9. Wylogowanie: oczekuje 204
+POST {{baseUrl}}/auth/logout
+
+### 10. Ocena bez logowania: oczekuje 401 i "Nie jesteś zalogowany."
+GET {{baseUrl}}/perfumes/{{candidateA}}/blind-buy-check
