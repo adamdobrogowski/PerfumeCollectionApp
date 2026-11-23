@@ -13,7 +13,7 @@ const DISCOVER_MAX_SECTIONS = 6;
 const DISCOVER_PER_SECTION = 30;
 
 // Dla kazdego centrum pobieramy tyle razy wiecej kandydatow niz miejsc w sekcji, bo czesc z nich
-// zostanie przypisana do innej sekcji (perfuma trafia tam, gdzie jest najblizej centrum).
+// zostanie przypisana do innej sekcji (perfumy trafiaja tam, gdzie jest najblizej centrum).
 const DISCOVER_OVERFETCH_FACTOR = 3;
 
 // Onboarding: ile perfum uzytkownik musi wskazac (minimum z dokumentacji) i ile najwyzej w jednym zadaniu.
