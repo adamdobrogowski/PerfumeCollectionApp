@@ -1,6 +1,6 @@
 // Blind Buy Guard: poziom ryzyka (0 = maly, 1 = sredni, 2 = duzy) z odleglosci kandydata od grupy Lubianych.
 
-const { VERY_CLOSE_COSINE } = require('./config');
+const { VERY_CLOSE_COSINE } = require('../config');
 
 // Odleglosc dzielimy progami p50 i p90 grupy: do p50 wlacznie = 0, do p90 wlacznie = 1, powyzej = 2.
 function levelFromThresholds(distance, p50, p90) {

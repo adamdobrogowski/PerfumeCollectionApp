@@ -1,4 +1,4 @@
-const { getPool } = require('../db');
+const { getPool } = require('../../db');
 
 async function loadOpinion(userId, perfumeId) {
     const { rows } = await getPool().query(

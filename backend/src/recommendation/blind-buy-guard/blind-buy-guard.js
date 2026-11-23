@@ -1,9 +1,9 @@
 // Blind Buy Guard: ocena kandydata na liste zyczen wzgledem gustu uzytkownika
 
-const { VERY_CLOSE_COSINE } = require('./config');
-const { buildCentre } = require('./centres');
+const { VERY_CLOSE_COSINE } = require('../config');
+const { buildCentre } = require('../shared/centres');
 const { assessRisk } = require('./risk');
-const { dot } = require('./vectors');
+const { dot } = require('../shared/vectors');
 
 function findNearestMember(vector, members) {
     let best = null;

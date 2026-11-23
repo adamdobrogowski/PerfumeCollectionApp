@@ -1,7 +1,7 @@
 // Centra zainteresowania uzytkownika
 // Czysta logika bez dostepu do bazy: dostaje Lubiane perfumy z wektorami oraz liste podrodzin z centroidami.
 
-const { MIN_LIKED_FOR_RELIABLE_CENTRE, BORDERLINE_MARGIN } = require('./config');
+const { MIN_LIKED_FOR_RELIABLE_CENTRE, BORDERLINE_MARGIN } = require('../config');
 const { dot, normalize, weightedMean } = require('./vectors');
 
 function addTo(map, key, member) {

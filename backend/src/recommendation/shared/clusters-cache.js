@@ -1,6 +1,6 @@
 // Podrodziny i nazwy klastrow wczytywane z bazy raz i trzymane w pamieci.
 
-const { getPool } = require('../db');
+const { getPool } = require('../../db');
 
 let cachePromise = null;
 

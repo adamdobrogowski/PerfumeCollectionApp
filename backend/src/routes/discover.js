@@ -1,10 +1,10 @@
 const express = require('express');
 const { requireAuth } = require('../auth/middleware');
-const { getClusters } = require('../recommendation/clusters-cache');
-const { loadLikes } = require('../recommendation/liked-loader');
-const { indexLikes, listCentres } = require('../recommendation/centres');
-const { findNearest } = require('../recommendation/neighbours-loader');
-const { pickCentres, candidateLimit, buildSections } = require('../recommendation/discover');
+const { getClusters } = require('../recommendation/shared/clusters-cache');
+const { loadLikes } = require('../recommendation/shared/liked-loader');
+const { indexLikes, listCentres } = require('../recommendation/shared/centres');
+const { findNearest } = require('../recommendation/discover/neighbours-loader');
+const { pickCentres, candidateLimit, buildSections } = require('../recommendation/discover/discover');
 const router = express.Router();
 
 router.use(requireAuth);

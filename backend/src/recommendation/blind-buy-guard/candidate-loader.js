@@ -1,6 +1,6 @@
 // Dane kandydata dla Blind Buy Guard: perfumy z wektorem, podrodzina, rodzina oraz nazwy do uzasadnienia.
 
-const { getPool } = require('../db');
+const { getPool } = require('../../db');
 
 async function loadCandidate(perfumeId) {
     const { rows } = await getPool().query(

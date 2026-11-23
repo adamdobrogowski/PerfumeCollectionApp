@@ -1,6 +1,6 @@
 // Wczytuje Lubiane perfumy uzytkownika w ksztalcie oczekiwanym przez centres.js:
 
-const { getPool } = require('../db');
+const { getPool } = require('../../db');
 
 async function loadLikes(userId) {
     const { rows } = await getPool().query(

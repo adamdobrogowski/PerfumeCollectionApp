@@ -1,7 +1,7 @@
 // Wyszukiwanie najblizszych perfum dla centrum zainteresowania
 // Szukanie jest dokladne (pgvector, operator <=> to odleglosc cosinusowa) i obejmuje caly katalog.
 
-const { getPool } = require('../db');
+const { getPool } = require('../../db');
 
 // centre: wektor centrum (tablica liczb). Zwraca perfumy od najbardziej podobnych.
 // Pole similarity (cosinus) sluzy tylko do deduplikacji miedzy sekcjami i nie trafia do odpowiedzi API.

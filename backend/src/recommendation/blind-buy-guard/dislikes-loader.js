@@ -1,7 +1,7 @@
 // Nielubiane perfumy uzytkownika podobne do kandydata (do ostrzezenia Blind Buy Guard).
 // Porownanie robi baza (pgvector), wiec nie wczytujemy do Node wektorow wszystkich Nielubianych.
 
-const { getPool } = require('../db');
+const { getPool } = require('../../db');
 
 // Zwraca Nielubiane o cosinusie do kandydata co najmniej minCosine, od najbardziej podobnej.
 // Pole similarity (cosinus) nie trafia do odpowiedzi API.

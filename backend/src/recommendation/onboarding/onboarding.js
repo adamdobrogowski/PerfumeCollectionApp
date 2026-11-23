@@ -5,7 +5,7 @@ const {
     ONBOARDING_MIN_DISLIKED,
     ONBOARDING_MAX_LIKED,
     ONBOARDING_MAX_DISLIKED,
-} = require('./config');
+} = require('../config');
 
 const MAX_INTEGER_ID = 2147483647;
 

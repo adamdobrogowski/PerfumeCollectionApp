@@ -1,6 +1,6 @@
 // Odkrywanie AI: sklada sekcje z perfum najblizszych centrom zainteresowania.
 
-const { DISCOVER_MAX_SECTIONS, DISCOVER_PER_SECTION, DISCOVER_OVERFETCH_FACTOR } = require('./config');
+const { DISCOVER_MAX_SECTIONS, DISCOVER_PER_SECTION, DISCOVER_OVERFETCH_FACTOR } = require('../config');
 
 function pickCentres(centres) {
     return centres.slice(0, DISCOVER_MAX_SECTIONS);

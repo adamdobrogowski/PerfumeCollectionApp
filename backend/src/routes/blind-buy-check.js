@@ -2,15 +2,15 @@ const express = require('express');
 const { requireAuth } = require('../auth/middleware');
 const { parsePerfumeId } = require('../shelf/shelf-state');
 const { VERY_CLOSE_COSINE } = require('../recommendation/config');
-const { getClusters } = require('../recommendation/clusters-cache');
-const { getThreshold } = require('../recommendation/thresholds-cache');
-const { loadCandidate } = require('../recommendation/candidate-loader');
-const { loadLikes } = require('../recommendation/liked-loader');
-const { loadOpinion } = require('../recommendation/shelf-opinion-loader');
-const { loadPerfumeBrief } = require('../recommendation/perfume-brief-loader');
-const { findSimilarDisliked } = require('../recommendation/dislikes-loader');
-const { indexLikes } = require('../recommendation/centres');
-const { assessCandidate } = require('../recommendation/blind-buy-guard');
+const { getClusters } = require('../recommendation/shared/clusters-cache');
+const { getThreshold } = require('../recommendation/blind-buy-guard/thresholds-cache');
+const { loadCandidate } = require('../recommendation/blind-buy-guard/candidate-loader');
+const { loadLikes } = require('../recommendation/shared/liked-loader');
+const { loadOpinion } = require('../recommendation/blind-buy-guard/shelf-opinion-loader');
+const { loadPerfumeBrief } = require('../recommendation/blind-buy-guard/perfume-brief-loader');
+const { findSimilarDisliked } = require('../recommendation/blind-buy-guard/dislikes-loader');
+const { indexLikes } = require('../recommendation/shared/centres');
+const { assessCandidate } = require('../recommendation/blind-buy-guard/blind-buy-guard');
 const router = express.Router();
 
 // Blind Buy Guard: ocena perfum przed dodaniem do listy zyczen. Router jest montowany na /api/v1/perfumes

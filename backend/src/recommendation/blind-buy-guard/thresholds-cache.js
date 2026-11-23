@@ -1,6 +1,6 @@
 // Progi ryzyka Blind Buy Guard (tabela cluster_thresholds, 72 wiersze) wczytywane z bazy raz i trzymane w pamieci.
 
-const { getPool } = require('../db');
+const { getPool } = require('../../db');
 
 let cachePromise = null;
 
