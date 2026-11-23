@@ -41,6 +41,7 @@ function buildSections(centres, candidateLists, nameById, perSection = DISCOVER_
             clusterId: centre.clusterId,
             clusterName: nameById.get(centre.clusterId) ?? null,
             confidence: centre.confidence,
+            likedCount: centre.members.length,
             perfumes,
         });
     });
