@@ -1,0 +1,149 @@
+@baseUrl = http://localhost:8080/api/v1
+
+# Smart Matching: POST /perfumes/:id/matches/search
+# Konto testowe z danymi na polce. Identyfikatory perfum dotycza biezacej bazy:
+#   8718 = SAUVAGE (marka 343), 1 = WAFFLE (brak sasiadow powyzej 0,800),
+#   21184 = wzorzec z 51 sasiadami, 21539 = wzorzec, ktorego sasiadem jest perfuma 22680 z polki konta.
+
+### 1. Logowanie: oczekuję 200 i ciasteczka perfume.sid
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "konto04321@gmail.com",
+  "password": "haslo1234567"
+}
+
+### 2. Puste cialo (domyslne ustawienia): oczekuję 200, source = SAUVAGE, 15 results (v, c, s), hasMore false, bez pola similarity
+POST {{baseUrl}}/perfumes/8718/matches/search
+Content-Type: application/json
+
+{}
+
+### 3. Bez ciala w ogole: oczekuję 200, taki sam wynik jak w kroku 2
+POST {{baseUrl}}/perfumes/8718/matches/search
+
+### 4. Filtry razem (plec, marka wzorca wykluczona, nuta ogolna, akord dominujacy): oczekuję 200 i krótszej listy, wszystkie wyniki men/unisex
+POST {{baseUrl}}/perfumes/8718/matches/search
+Content-Type: application/json
+
+{
+  "gender": "men",
+  "excludeSameBrand": true,
+  "notes": { "include": [{ "kind": "general", "id": 1153 }] },
+  "accords": { "include": [{ "accordId": 32, "strength": "dominant" }] }
+}
+
+### 5. Wykluczenie nuty i akordu (silą "background"): oczekuję 200 i wyników bez tej nuty
+POST {{baseUrl}}/perfumes/8718/matches/search
+Content-Type: application/json
+
+{
+  "notes": { "exclude": [{ "kind": "general", "id": 1153 }] },
+  "accords": { "exclude": [{ "accordId": 32, "strength": "background" }] }
+}
+
+### 6. Status polki przy hideKnown=false: oczekuję 200 i w results perfumy 22680 z shelf { opinion: "liked", placement: "collection" }
+POST {{baseUrl}}/perfumes/21539/matches/search
+Content-Type: application/json
+
+{ "hideKnown": false }
+
+### 7. To samo z domyslnym hideKnown: oczekuję 200 i braku perfumy 22680 w results (wszystkie shelf = null)
+POST {{baseUrl}}/perfumes/21539/matches/search
+Content-Type: application/json
+
+{}
+
+### 8. Paginacja, strona 1 (51 sasiadow): oczekuję 200, 20 results, hasMore true
+POST {{baseUrl}}/perfumes/21184/matches/search
+Content-Type: application/json
+
+{ "hideKnown": false, "offset": 0 }
+
+### 9. Paginacja, strona 2: oczekuję 200, 20 results, hasMore true
+POST {{baseUrl}}/perfumes/21184/matches/search
+Content-Type: application/json
+
+{ "hideKnown": false, "offset": 20 }
+
+### 10. Paginacja, strona 3: oczekuję 200, 11 results, hasMore false
+POST {{baseUrl}}/perfumes/21184/matches/search
+Content-Type: application/json
+
+{ "hideKnown": false, "offset": 40 }
+
+### 11. Wzorzec bez zamiennikow (WAFFLE): oczekuję 200, results = [] i hasMore false
+POST {{baseUrl}}/perfumes/1/matches/search
+Content-Type: application/json
+
+{}
+
+### 12. Zly format filtra: oczekuję 400 i "Pole \"gender\" musi mieć wartość: women, men, unisex."
+POST {{baseUrl}}/perfumes/8718/matches/search
+Content-Type: application/json
+
+{ "gender": "kids" }
+
+### 13. Sprzeczne warunki nuty: oczekuję 400 i "Ta sama pozycja nie może być jednocześnie w \"notes.include\" i w \"notes.exclude\"."
+POST {{baseUrl}}/perfumes/8718/matches/search
+Content-Type: application/json
+
+{
+  "notes": {
+    "include": [{ "kind": "general", "id": 1153 }],
+    "exclude": [{ "kind": "general", "id": 1153 }]
+  }
+}
+
+### 14. Marka wzorca wykluczona i wybrana jednocześnie: oczekuję 400 i "Nie można jednocześnie wykluczyć marki wzorca i wybrać jej w filtrze marek."
+POST {{baseUrl}}/perfumes/8718/matches/search
+Content-Type: application/json
+
+{ "excludeSameBrand": true, "brandIds": [343] }
+
+### 15. Niepoprawny identyfikator perfum: oczekuję 400 i "Nieprawidłowy identyfikator perfum."
+POST {{baseUrl}}/perfumes/abc/matches/search
+Content-Type: application/json
+
+{}
+
+### 16. Nieistniejace perfumy: oczekuję 404 i "Nie znaleziono perfum."
+POST {{baseUrl}}/perfumes/999999999/matches/search
+Content-Type: application/json
+
+{}
+
+### 17. Niepoprawny JSON: oczekuję 400 i "Niepoprawny format JSON."
+POST {{baseUrl}}/perfumes/8718/matches/search
+Content-Type: application/json
+
+{ "gender": 
+
+### 18. Wylogowanie: oczekuję 204
+POST {{baseUrl}}/auth/logout
+
+### 19. Bez logowania: oczekuję 401 i "Nie jesteś zalogowany."
+POST {{baseUrl}}/perfumes/8718/matches/search
+Content-Type: application/json
+
+{}
+
+
+### 18a. Porownanie SAUVAGE z bliskim zamiennikiem SAUVEGY (5266): oczekuję 200, level "very_close", source = SAUVAGE, other = SAUVEGY, w notes i accords pola shared (true/false)
+GET {{baseUrl}}/perfumes/8718/compare/5266
+
+### 18b. To samo w odwrotnej kolejnosci: oczekuję 200, ten sam level, source i other zamienione miejscami
+GET {{baseUrl}}/perfumes/5266/compare/8718
+
+### 18c. SAUVAGE i WAFFLE (rozne zapachy): oczekuję 200 i level null
+GET {{baseUrl}}/perfumes/8718/compare/1
+
+### 18d. Te same perfumy: oczekuję 400 i "Wybierz dwie różne perfumy do porównania."
+GET {{baseUrl}}/perfumes/8718/compare/8718
+
+### 18e. Niepoprawny identyfikator: oczekuję 400 i "Nieprawidłowy identyfikator perfum."
+GET {{baseUrl}}/perfumes/abc/compare/8718
+
+### 18f. Nieistniejaca druga perfuma: oczekuję 404 i "Nie znaleziono perfum."
+GET {{baseUrl}}/perfumes/8718/compare/999999999
