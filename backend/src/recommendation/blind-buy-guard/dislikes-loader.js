@@ -16,7 +16,7 @@ async function findSimilarDisliked(userId, vector, minCosine) {
           WHERE s.user_id = $2
             AND s.opinion = 'disliked'
             AND 1 - (e.embedding <=> $1::vector) >= $3
-          ORDER BY e.embedding <=> $1::vector`,
+          ORDER BY similarity DESC`,
         [JSON.stringify(vector), userId, minCosine]
     );
     return rows.map((row) => ({
