@@ -10,6 +10,7 @@ const perfumeNotesRoutes = require("./routes/perfume-notes");
 const discoverRoutes = require("./routes/discover");
 const blindBuyCheckRoutes = require("./routes/blind-buy-check");
 const onboardingRoutes = require("./routes/onboarding");
+const shelfStatsRoutes = require("./routes/shelf-stats");
 
 const app = express();
 app.use(helmet());
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use(createSessionMiddleware());  
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/perfumes", perfumeRoutes);
+app.use("/api/v1/shelf/stats", shelfStatsRoutes);
 app.use("/api/v1/shelf", shelfRoutes);
 app.use("/api/v1/perfume-notes", perfumeNotesRoutes);
 app.use("/api/v1", catalogRoutes);

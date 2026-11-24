@@ -22,6 +22,9 @@ const ONBOARDING_MIN_DISLIKED = 1;
 const ONBOARDING_MAX_LIKED = 20;
 const ONBOARDING_MAX_DISLIKED = 20;
 
+// Statystyki polki: ile pozycji pokazujemy w zestawieniach nut (najczestsze i ulubione).
+const SHELF_STATS_TOP_NOTES = 10;
+
 module.exports = {
     MIN_LIKED_FOR_RELIABLE_CENTRE,
     VERY_CLOSE_COSINE,
@@ -33,4 +36,5 @@ module.exports = {
     ONBOARDING_MIN_DISLIKED,
     ONBOARDING_MAX_LIKED,
     ONBOARDING_MAX_DISLIKED,
+    SHELF_STATS_TOP_NOTES,
 };

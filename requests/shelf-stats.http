@@ -1,0 +1,54 @@
+@baseUrl = http://localhost:8080/api/v1
+
+# Statystyki polki (rodziny, najczestsze nuty, ulubione nuty).
+# Zaloguj sie kontem z kilkunastoma perfumami na polce (w razie potrzeby zmien email i haslo w kroku 1).
+
+### 1. Logowanie: oczekuje 200 i ciasteczka perfume.sid
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "konto04321@gmail.com",
+  "password": "haslo1234567"
+}
+
+### 2. Statystyki: oczekuje 200 i pol collectionTotal, likedTotal, families, frequentNotes, favouriteNotes
+# families: udzialy (share to ulamek 0-1) sumuja sie do 1; frequentNotes i favouriteNotes: najwyzej 10 pozycji
+GET {{baseUrl}}/shelf/stats
+
+### 3. Polka do recznego porownania: collectionTotal = liczba wpisow z placement = "collection",
+# likedTotal = liczba wpisow z opinion = "liked"; suma perfumeCount w families = collectionTotal
+GET {{baseUrl}}/shelf
+
+### 4. Dodaj perfumy do kolekcji jako Lubiane z ocena 3 (zmien @newId na perfumy, ktorych nie masz): oczekuje 200
+@newId = 20911
+PUT {{baseUrl}}/shelf/{{newId}}
+Content-Type: application/json
+
+{
+  "opinion": "liked",
+  "likeStrength": 3,
+  "placement": "collection"
+}
+
+### 5. Statystyki po zmianie: collectionTotal i likedTotal wieksze o 1, nuty tych perfum maja wyzsze wartosci
+GET {{baseUrl}}/shelf/stats
+
+### 6. Sprzatanie: usun wpis z polki, oczekuje 200 i entry = null
+PUT {{baseUrl}}/shelf/{{newId}}
+Content-Type: application/json
+
+{
+  "opinion": null,
+  "likeStrength": null,
+  "placement": null
+}
+
+### 7. Statystyki po sprzataniu: takie same liczby jak w kroku 2
+GET {{baseUrl}}/shelf/stats
+
+### 8. Wylogowanie: oczekuje 204
+POST {{baseUrl}}/auth/logout
+
+### 9. Statystyki bez logowania: oczekuje 401 i "Nie jesteś zalogowany."
+GET {{baseUrl}}/shelf/stats
