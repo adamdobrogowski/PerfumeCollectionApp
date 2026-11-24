@@ -34,6 +34,13 @@ const MATCH_MAX_OFFSET = 10000;
 // Sila akordu -> najnizsza pozycja w perfumach (accord_rank 1-5), na ktorej akord jeszcze sie liczy.
 const MATCH_ACCORD_MAX_RANK = { dominant: 1, clear: 3, background: 5 };
 
+// Smart Matching: wielkosc strony wynikow i progi poziomow podobienstwa (cosinus).
+// Poziom "bardzo bliski zamiennik" to VERY_CLOSE_COSINE (wyzej w tym pliku).
+const MATCH_PAGE_SIZE = 20;
+const MATCH_CLOSE_COSINE = 0.842;
+// Ponizej tej wartosci perfumy nie sa pokazywane w ogole.
+const MATCH_MIN_COSINE = 0.8;
+
 module.exports = {
     MIN_LIKED_FOR_RELIABLE_CENTRE,
     VERY_CLOSE_COSINE,
@@ -50,4 +57,7 @@ module.exports = {
     MATCH_MAX_BRANDS,
     MATCH_MAX_OFFSET,
     MATCH_ACCORD_MAX_RANK,
+    MATCH_PAGE_SIZE,
+    MATCH_CLOSE_COSINE,
+    MATCH_MIN_COSINE,
 };
