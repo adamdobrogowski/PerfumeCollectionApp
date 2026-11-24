@@ -25,6 +25,15 @@ const ONBOARDING_MAX_DISLIKED = 20;
 // Statystyki polki: ile pozycji pokazujemy w zestawieniach nut (najczestsze i ulubione).
 const SHELF_STATS_TOP_NOTES = 10;
 
+// Smart Matching: ograniczenia ciala zadania.
+// Najwyzej tyle pozycji w jednej liscie warunkow (nuty lub akordy, osobno dla include i exclude).
+const MATCH_MAX_CONDITIONS = 10;
+const MATCH_MAX_BRANDS = 20;
+const MATCH_MAX_OFFSET = 10000;
+
+// Sila akordu -> najnizsza pozycja w perfumach (accord_rank 1-5), na ktorej akord jeszcze sie liczy.
+const MATCH_ACCORD_MAX_RANK = { dominant: 1, clear: 3, background: 5 };
+
 module.exports = {
     MIN_LIKED_FOR_RELIABLE_CENTRE,
     VERY_CLOSE_COSINE,
@@ -37,4 +46,8 @@ module.exports = {
     ONBOARDING_MAX_LIKED,
     ONBOARDING_MAX_DISLIKED,
     SHELF_STATS_TOP_NOTES,
+    MATCH_MAX_CONDITIONS,
+    MATCH_MAX_BRANDS,
+    MATCH_MAX_OFFSET,
+    MATCH_ACCORD_MAX_RANK,
 };
