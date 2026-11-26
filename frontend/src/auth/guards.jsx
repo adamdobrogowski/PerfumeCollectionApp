@@ -20,8 +20,6 @@ function SessionCheckScreen({ error, onRetry }) {
   )
 }
 
-// Czy trzeba pokazać ekran sprawdzania sesji. Gdy użytkownik jest już znany (albo wiemy, że jest gościem),
-// chwilowy błąd odświeżania w tle nie wyrzuca go z aplikacji.
 function useSessionState() {
   const query = useCurrentUser()
   const isChecking = query.isPending || (query.error && query.data === undefined)
@@ -52,6 +50,26 @@ export function RequireGuest() {
   }
   if (user) {
     return <Navigate to={location.state?.from ?? '/discover'} replace />
+  }
+  return <Outlet />
+}
+
+// Sprawdzamy dokładnie false: brak pola nie powinien wyrzucać nikogo z aplikacji.
+export function RequireOnboardingDone() {
+  const { data: user } = useCurrentUser()
+
+  if (user.onboardingCompleted === false) {
+    return <Navigate to="/onboarding" replace />
+  }
+  return <Outlet />
+}
+
+// Wpuszcza na /onboarding tylko użytkowników z nieukończonym onboardingiem. Pozostali wracają do Odkrywaj. 
+export function RequireOnboardingPending() {
+  const { data: user } = useCurrentUser()
+
+  if (user.onboardingCompleted !== false) {
+    return <Navigate to="/discover" replace />
   }
   return <Outlet />
 }

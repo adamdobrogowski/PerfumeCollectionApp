@@ -1,6 +1,5 @@
 import { apiFetch, ApiError } from './client.js'
 
-// Zwraca zalogowanego użytkownika ({ userId, email, role }) albo null, gdy nie ma sesji (401).
 export async function fetchCurrentUser() {
   try {
     return await apiFetch('/auth/me')
@@ -12,18 +11,16 @@ export async function fetchCurrentUser() {
   }
 }
 
-// Zwraca { userId, email, role }. Błędy (401, 403, 429...) zgłasza jako ApiError z komunikatem z backendu.
-export function login(email, password) {
-  return apiFetch('/auth/login', { method: 'POST', body: { email, password } })
+export async function login(email, password) {
+  await apiFetch('/auth/login', { method: 'POST', body: { email, password } })
+  return fetchCurrentUser()
 }
 
-// Backend odpowiada 204 bez treści.
+export async function register(email, password, displayName) {
+  await apiFetch('/auth/register', { method: 'POST', body: { email, password, displayName } })
+  return fetchCurrentUser()
+}
+
 export function logout() {
   return apiFetch('/auth/logout', { method: 'POST' })
-}
-
-// Backend od razu loguje nowego użytkownika. Zwraca { userId, email, role }.
-// Błędy walidacji (400) i zajęte pola (409) mają obiekt fields z komunikatami dla pól.
-export function register(email, password, displayName) {
-  return apiFetch('/auth/register', { method: 'POST', body: { email, password, displayName } })
 }
