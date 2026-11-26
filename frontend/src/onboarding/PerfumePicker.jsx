@@ -34,7 +34,7 @@ const GENDER_OPTIONS = Object.entries(GENDER_LABELS).map(([value, label]) => ({
 
 const ALL_FAMILIES = 'all'
 
-function PerfumePicker({ selectedIds, onAdd }) {
+function PerfumePicker({ selectedIds, blockedIds = [], blockedLabel = null, onAdd, addDisabled = false }) {
   const [text, setText] = useState('')
   const [genders, setGenders] = useState([])
   const [familyKey, setFamilyKey] = useState(ALL_FAMILIES)
@@ -105,6 +105,8 @@ function PerfumePicker({ selectedIds, onAdd }) {
               key={perfume.id}
               perfume={perfume}
               isSelected={selectedIds.includes(perfume.id)}
+              blockedLabel={blockedIds.includes(perfume.id) ? blockedLabel : null}
+              disabled={addDisabled}
               onAdd={() => onAdd(perfume)}
             />
           ))}

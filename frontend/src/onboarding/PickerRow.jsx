@@ -3,8 +3,8 @@ import AccordBadge from '../shared/perfume/AccordBadge.jsx'
 import { GENDER_LABELS, capitalizeFirst } from '../shared/perfume/labels.js'
 import PerfumeCover from '../shared/perfume/PerfumeCover.jsx'
 
-function PickerRow({ perfume, isSelected, onAdd }) {
-  const details = [
+function PickerRow({ perfume, isSelected, blockedLabel = null, disabled = false, onAdd }) {
+    const details = [
     GENDER_LABELS[perfume.gender] && capitalizeFirst(GENDER_LABELS[perfume.gender]),
     perfume.releaseYear,
     perfume.family.name,
@@ -36,8 +36,12 @@ function PickerRow({ perfume, isSelected, onAdd }) {
             </Group>
           )}
         </Stack>
-        <Button variant={isSelected ? 'default' : 'light'} disabled={isSelected} onClick={onAdd}>
-          {isSelected ? 'Dodano ✓' : 'Dodaj'}
+        <Button
+          variant={isSelected ? 'default' : 'light'}
+          disabled={isSelected || blockedLabel !== null || disabled}
+          onClick={onAdd}
+        >
+          {isSelected ? 'Dodano ✓' : (blockedLabel ?? 'Dodaj')}
         </Button>
       </Group>
     </Paper>
