@@ -29,8 +29,7 @@ function DislikedStep({ disliked, likedIds, onAdd, onRemove, onBack, onNext }) {
 
       <PerfumePicker
         selectedIds={disliked.map((perfume) => perfume.id)}
-        blockedIds={likedIds}
-        blockedLabel="Jest w Lubianych"
+        excludedIds={likedIds}
         onAdd={onAdd}
         addDisabled={isFull}
       />

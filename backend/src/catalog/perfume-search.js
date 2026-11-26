@@ -10,6 +10,7 @@ const MIN_QUERY_LENGTH = 3;
 const MAX_QUERY_LENGTH = 100;
 const MAX_QUERY_WORDS = 5;
 const MAX_LIST_ITEMS = 10;
+const MAX_EXCLUDE_IDS = 20;
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
@@ -44,8 +45,7 @@ function readId(query, name) {
     return Number(text);
 }
 
-// Lista identyfikatorów rozdzielonych przecinkami (np. notes=12,45). 
-function readIdList(query, name) {
+function readIdList(query, name, maxItems = MAX_LIST_ITEMS) {
     const text = readText(query, name);
     if (text === undefined) {
         return [];
@@ -55,8 +55,8 @@ function readIdList(query, name) {
         throw new SearchParamError(`Parametr ${name} musi być listą identyfikatorów rozdzielonych przecinkami.`);
     }
     const ids = [...new Set(parts.map(Number))];
-    if (ids.length > MAX_LIST_ITEMS) {
-        throw new SearchParamError(`Parametr ${name} może zawierać najwyżej ${MAX_LIST_ITEMS} identyfikatorów.`);
+    if (ids.length > maxItems) {
+        throw new SearchParamError(`Parametr ${name} może zawierać najwyżej ${maxItems} identyfikatorów.`);
     }
     return ids;
 }
@@ -122,6 +122,7 @@ function readParams(query) {
     const excludeNoteIds = readIdList(query, 'excludeNotes');
     const accordIds = readIdList(query, 'accords');
     const excludeAccordIds = readIdList(query, 'excludeAccords');
+    const excludeIds = readIdList(query, 'excludeIds', MAX_EXCLUDE_IDS);
     assertNoOverlap(noteIds, excludeNoteIds, 'notes', 'excludeNotes');
     assertNoOverlap(accordIds, excludeAccordIds, 'accords', 'excludeAccords');
 
@@ -140,6 +141,7 @@ function readParams(query) {
         genders,
         familyId: readId(query, 'family'),
         subfamilyId: readId(query, 'subfamily'),
+        excludeIds,
         noteIds,
         excludeNoteIds,
         accordIds,
@@ -198,6 +200,9 @@ function buildSearchQueries(params) {
     }
     if (params.subfamilyId !== null) {
         conditions.push(`sf.cluster_id = ${add(params.subfamilyId)}`);
+    }
+    if (params.excludeIds.length > 0) {
+        conditions.push(`p.perfume_id <> ALL(${add(params.excludeIds)}::int[])`);
     }
 
     // Nuty ogólne: perfumy muszą mieć każdą z wybranych (co najmniej jedną nutę szczegółową z każdej grupy).
