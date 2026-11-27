@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { saveShelfEntry } from '../api/shelf.js'
 import { shelfListKey } from './useShelf.js'
 import { shelfEntryKey } from './useShelfEntry.js'
+import { discoverKey } from '../discover/useDiscover.js'
 
 export function useSaveShelfEntry(perfumeId) {
   const queryClient = useQueryClient()
@@ -12,6 +13,7 @@ export function useSaveShelfEntry(perfumeId) {
     onSuccess: (data) => {
       queryClient.setQueryData(shelfEntryKey(perfumeId), data)
       queryClient.invalidateQueries({ queryKey: shelfListKey })
+      queryClient.invalidateQueries({ queryKey: discoverKey })
     },
     onError: (error) =>
       notifications.show({ color: 'red', title: 'Nie udało się zapisać zmiany', message: error.message }),

@@ -11,6 +11,7 @@ import PerfumePage from './pages/PerfumePage.jsx'
 import RegisterPage from './pages/RegisterPage.jsx'
 import ShelfPage from './pages/ShelfPage.jsx'
 import WelcomePage from './pages/WelcomePage.jsx'
+import DiscoverPage from './pages/DiscoverPage.jsx'
 
 function App() {
   return (
@@ -23,7 +24,7 @@ function App() {
       <Route element={<RequireAuth />}>
         <Route element={<RequireOnboardingDone />}>
           <Route element={<AppLayout />}>
-            <Route path="/discover" element={<ComingSoonPage title="Odkrywaj" />} />
+            <Route path="/discover" element={<DiscoverPage />} />
             <Route path="/catalog" element={<CatalogPage />} />
             <Route path="/perfumes/:id" element={<PerfumePage />} />
             <Route path="/shelf" element={<ShelfPage />} />
