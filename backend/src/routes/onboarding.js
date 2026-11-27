@@ -3,6 +3,7 @@ const { withTransaction } = require('../db');
 const { requireAuth } = require('../auth/middleware');
 const { parseOnboarding } = require('../recommendation/onboarding/onboarding');
 const { saveOnboarding } = require('../recommendation/onboarding/onboarding-save');
+const { invalidateDiscover } = require('../recommendation/discover/discover-cache');
 const router = express.Router();
 
 const FOREIGN_KEY_VIOLATION_CODE = '23503';
@@ -18,6 +19,7 @@ router.post('/', requireAuth, async (req, res) => {
         if (result.alreadyCompleted) {
             return res.status(409).json({ status: 'error', message: 'Onboarding został już ukończony.' });
         }
+        invalidateDiscover(req.user.userId);
         return res.json({ onboardingCompleted: true });
     } catch (err) {
         if (err.code === FOREIGN_KEY_VIOLATION_CODE) {

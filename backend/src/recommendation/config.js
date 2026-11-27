@@ -16,6 +16,12 @@ const DISCOVER_PER_SECTION = 30;
 // zostanie przypisana do innej sekcji (perfumy trafiaja tam, gdzie jest najblizej centrum).
 const DISCOVER_OVERFETCH_FACTOR = 3;
 
+// Odkrywanie AI: ile Lubianych perfum pokazujemy w opisie sekcji ("Bo lubisz: ...").
+const DISCOVER_BASED_ON_COUNT = 3;
+
+// Odkrywanie AI: jak dlugo wynik uzytkownika zostaje w pamieci serwera (zmiana polki uniewaznia go wczesniej).
+const DISCOVER_CACHE_TTL_MS = 30 * 60 * 1000;
+
 // Onboarding: ile perfum uzytkownik musi wskazac (minimum z dokumentacji) i ile najwyzej w jednym zadaniu.
 const ONBOARDING_MIN_LIKED = 3;
 const ONBOARDING_MIN_DISLIKED = 1;
@@ -48,6 +54,8 @@ module.exports = {
     DISCOVER_MAX_SECTIONS,
     DISCOVER_PER_SECTION,
     DISCOVER_OVERFETCH_FACTOR,
+    DISCOVER_BASED_ON_COUNT,
+    DISCOVER_CACHE_TTL_MS,
     ONBOARDING_MIN_LIKED,
     ONBOARDING_MIN_DISLIKED,
     ONBOARDING_MAX_LIKED,

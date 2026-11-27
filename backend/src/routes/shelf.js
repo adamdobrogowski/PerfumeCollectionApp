@@ -2,6 +2,7 @@ const express = require('express');
 const { getPool } = require('../db');
 const { requireAuth } = require('../auth/middleware');
 const { parsePerfumeId, parseShelfState } = require('../shelf/shelf-state');
+const { invalidateDiscover } = require('../recommendation/discover/discover-cache');
 const router = express.Router();
 
 router.use(requireAuth);
@@ -86,6 +87,7 @@ router.put('/:perfumeId', async (req, res) => {
                 'DELETE FROM shelf_entries WHERE user_id = $1 AND perfume_id = $2',
                 [req.user.userId, perfumeId]
             );
+            invalidateDiscover(req.user.userId);
             return res.json({ entry: null });
         }
 
@@ -100,6 +102,7 @@ router.put('/:perfumeId', async (req, res) => {
              RETURNING opinion, like_strength, placement`,
             [req.user.userId, perfumeId, state.opinion, state.likeStrength, state.placement]
         );
+        invalidateDiscover(req.user.userId);
         return res.json({ entry: toEntry(result.rows[0]) });
     } catch (err) {
         if (err.code === '23503') {

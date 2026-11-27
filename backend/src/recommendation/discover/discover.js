@@ -1,6 +1,11 @@
 // Odkrywanie AI: sklada sekcje z perfum najblizszych centrom zainteresowania.
 
-const { DISCOVER_MAX_SECTIONS, DISCOVER_PER_SECTION, DISCOVER_OVERFETCH_FACTOR } = require('../config');
+const {
+    DISCOVER_MAX_SECTIONS,
+    DISCOVER_PER_SECTION,
+    DISCOVER_OVERFETCH_FACTOR,
+    DISCOVER_BASED_ON_COUNT,
+} = require('../config');
 
 function pickCentres(centres) {
     return centres.slice(0, DISCOVER_MAX_SECTIONS);
@@ -10,7 +15,16 @@ function candidateLimit() {
     return DISCOVER_PER_SECTION * DISCOVER_OVERFETCH_FACTOR;
 }
 
-function buildSections(centres, candidateLists, nameById, perSection = DISCOVER_PER_SECTION) {
+// Id Lubianych perfum, ktore pokazujemy w opisie sekcji ("Bo lubisz: ..."): najmocniej lubiane, przy remisie nizsze id.
+function pickBasedOnIds(members) {
+    return [...members]
+        .sort((a, b) => b.strength - a.strength || a.perfumeId - b.perfumeId)
+        .slice(0, DISCOVER_BASED_ON_COUNT)
+        .map((member) => member.perfumeId);
+}
+
+// briefById: Map(perfumeId -> { id, name, brand }) dla perfum z pickBasedOnIds (patrz loadPerfumeBriefs).
+function buildSections(centres, candidateLists, nameById, perSection = DISCOVER_PER_SECTION, briefById = new Map()) {
     if (centres.length !== candidateLists.length) {
         throw new Error('Liczba list kandydatow musi byc rowna liczbie centrow.');
     }
@@ -36,16 +50,22 @@ function buildSections(centres, candidateLists, nameById, perSection = DISCOVER_
         if (perfumes.length === 0) {
             return;
         }
+        const basedOn = pickBasedOnIds(centre.members)
+            .map((perfumeId) => briefById.get(perfumeId))
+            .filter(Boolean)
+            .map(({ id, name, brand }) => ({ perfumeId: id, name, brand }));
+
         sections.push({
             scope: centre.scope,
             clusterId: centre.clusterId,
             clusterName: nameById.get(centre.clusterId) ?? null,
             confidence: centre.confidence,
             likedCount: centre.members.length,
+            basedOn,
             perfumes,
         });
     });
     return sections;
 }
 
-module.exports = { pickCentres, candidateLimit, buildSections };
+module.exports = { pickCentres, candidateLimit, pickBasedOnIds, buildSections };
