@@ -10,11 +10,15 @@ const NIL_USER_ID = '00000000-0000-0000-0000-000000000000';
 async function warmUpDiscover() {
     const startedAt = Date.now();
     const { subfamilies } = await getClusters();
+    const clustersMs = Date.now() - startedAt;
     if (subfamilies.length === 0) {
         return;
     }
     await findNearest(NIL_USER_ID, subfamilies[0].centroid, 1);
-    console.log(`Rozgrzewka Odkrywania AI zakończona (${Date.now() - startedAt} ms).`);
+    const totalMs = Date.now() - startedAt;
+    console.log(
+        `Rozgrzewka Odkrywania AI zakończona (${totalMs} ms: połączenie i klastry ${clustersMs} ms, wyszukiwanie ${totalMs - clustersMs} ms).`
+    );
 }
 
 module.exports = { warmUpDiscover };
