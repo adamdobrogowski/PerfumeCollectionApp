@@ -65,6 +65,35 @@ function parseFeedQuery(query) {
     return { value: { cursor, limit, kind } };
 }
 
+function parseCommentsQuery(query) {
+    const input = isPlainObject(query) ? query : {};
+    let cursor = null;
+    let limit = DEFAULT_FEED_LIMIT;
+
+    if (input.cursor !== undefined && input.cursor !== '') {
+        if (typeof input.cursor !== 'string') {
+            return { error: 'Nieprawidłowy kursor stronicowania.' };
+        }
+        cursor = parsePositiveId(input.cursor);
+        if (cursor === null) {
+            return { error: 'Nieprawidłowy kursor stronicowania.' };
+        }
+    }
+
+    if (input.limit !== undefined && input.limit !== '') {
+        if (typeof input.limit !== 'string') {
+            return { error: `Limit musi być liczbą całkowitą od 1 do ${MAX_FEED_LIMIT}.` };
+        }
+        const parsedLimit = parsePositiveId(input.limit);
+        if (parsedLimit === null || parsedLimit > MAX_FEED_LIMIT) {
+            return { error: `Limit musi być liczbą całkowitą od 1 do ${MAX_FEED_LIMIT}.` };
+        }
+        limit = parsedLimit;
+    }
+
+    return { value: { cursor, limit } };
+}
+
 function validateTextBody(rawBody, maxLength, emptyMessage, tooLongMessage) {
     if (typeof rawBody !== 'string') {
         return { error: emptyMessage };
@@ -203,6 +232,7 @@ module.exports = {
     MAX_PERFUMES_PER_POST,
     parsePositiveId,
     parseFeedQuery,
+    parseCommentsQuery,
     validatePostCreate,
     validatePostEdit,
     validateCommentBody,

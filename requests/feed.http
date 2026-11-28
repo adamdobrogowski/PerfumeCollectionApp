@@ -118,3 +118,148 @@ DELETE {{baseUrl}}/posts/{{createSotd.response.body.id}}
 
 ### 19. Odczyt usuniętego posta: oczekuję 404
 GET {{baseUrl}}/posts/{{createSotd.response.body.id}}
+
+### ============================================================
+### ETAP 4: KOMENTARZE I GŁOSY POD POSTAMI
+### ============================================================
+
+### 4.1. Logowanie jako użytkownik 1: oczekuję 200
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick1@example.com",
+  "password": "Przykladowe-haslo-123"
+}
+
+### 4.2. Utworzenie posta do testów głosów i komentarzy: oczekuję 201
+# @name stage4Post
+POST {{baseUrl}}/posts
+Content-Type: application/json
+
+{
+  "kind": "free",
+  "body": "Post testowy dla komentarzy i głosów."
+}
+
+### 4.3. Oddanie głosu +1: oczekuję 200 i { score: 1, myVote: 1 }
+PUT {{baseUrl}}/posts/{{stage4Post.response.body.id}}/vote
+Content-Type: application/json
+
+{
+  "value": 1
+}
+
+### 4.4. Zmiana głosu na -1: oczekuję 200 i { score: -1, myVote: -1 }
+PUT {{baseUrl}}/posts/{{stage4Post.response.body.id}}/vote
+Content-Type: application/json
+
+{
+  "value": -1
+}
+
+### 4.5. Nieprawidłowa wartość głosu (0): oczekuję 400
+PUT {{baseUrl}}/posts/{{stage4Post.response.body.id}}/vote
+Content-Type: application/json
+
+{
+  "value": 0
+}
+
+### 4.6. Sprawdzenie posta z głosem w fetchPostById: oczekuję 200, score: -1, myVote: -1
+GET {{baseUrl}}/posts/{{stage4Post.response.body.id}}
+
+### 4.7. Cofnięcie głosu: oczekuję 200 i { score: 0, myVote: null }
+DELETE {{baseUrl}}/posts/{{stage4Post.response.body.id}}/vote
+
+### 4.8. Ponowne cofnięcie głosu (idempotentność): oczekuję 200 i { score: 0, myVote: null }
+DELETE {{baseUrl}}/posts/{{stage4Post.response.body.id}}/vote
+
+### 4.9. Dodanie pierwszego komentarza: oczekuję 201 z editedAt: null
+# @name comment1
+POST {{baseUrl}}/posts/{{stage4Post.response.body.id}}/comments
+Content-Type: application/json
+
+{
+  "body": "Pierwszy komentarz pod postem."
+}
+
+### 4.10. Pusta treść komentarza (same spacje): oczekuję 400 i fields.body
+POST {{baseUrl}}/posts/{{stage4Post.response.body.id}}/comments
+Content-Type: application/json
+
+{
+  "body": "    "
+}
+
+### 4.11. Dodanie drugiego komentarza: oczekuję 201
+POST {{baseUrl}}/posts/{{stage4Post.response.body.id}}/comments
+Content-Type: application/json
+
+{
+  "body": "Drugi komentarz do testu stronicowania."
+}
+
+### 4.12. Lista komentarzy z limit=1: oczekuję 200, 1. komentarz i niepusty nextCursor
+# @name commentsPage1
+GET {{baseUrl}}/posts/{{stage4Post.response.body.id}}/comments?limit=1
+
+### 4.13. Druga strona komentarzy po kursorze: oczekuję 200, 2. komentarz i nextCursor: null
+GET {{baseUrl}}/posts/{{stage4Post.response.body.id}}/comments?limit=1&cursor={{commentsPage1.response.body.nextCursor}}
+
+### 4.14. Edycja komentarza: oczekuję 200 z nową treścią i niepustym editedAt
+PATCH {{baseUrl}}/posts/{{stage4Post.response.body.id}}/comments/{{comment1.response.body.id}}
+Content-Type: application/json
+
+{
+  "body": "Pierwszy komentarz po edycji."
+}
+
+### 4.15. Sprawdzenie licznika komentarzy na poście: oczekuję 200 i commentCount: 2
+GET {{baseUrl}}/posts/{{stage4Post.response.body.id}}
+
+### 4.16. Przełączenie na użytkownika 2: oczekuję 200
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick2@example.com",
+  "password": "Przykladowe-haslo-123"
+}
+
+### 4.17. Głos +1 od użytkownika 2: oczekuję 200 i { score: 1, myVote: 1 }
+PUT {{baseUrl}}/posts/{{stage4Post.response.body.id}}/vote
+Content-Type: application/json
+
+{
+  "value": 1
+}
+
+### 4.18. Próba edycji cudzego komentarza: oczekuję 403
+PATCH {{baseUrl}}/posts/{{stage4Post.response.body.id}}/comments/{{comment1.response.body.id}}
+Content-Type: application/json
+
+{
+  "body": "Próba zmiany cudzego komentarza."
+}
+
+### 4.19. Próba usunięcia cudzego komentarza: oczekuję 403
+DELETE {{baseUrl}}/posts/{{stage4Post.response.body.id}}/comments/{{comment1.response.body.id}}
+
+### 4.20. Powrót na użytkownika 1: oczekuję 200
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick1@example.com",
+  "password": "Przykladowe-haslo-123"
+}
+
+### 4.21. Usunięcie własnego komentarza: oczekuję 204
+DELETE {{baseUrl}}/posts/{{stage4Post.response.body.id}}/comments/{{comment1.response.body.id}}
+
+### 4.22. Sprawdzenie licznika po usunięciu komentarza i głosie usera 2: oczekuję score: 1, myVote: null, commentCount: 1
+GET {{baseUrl}}/posts/{{stage4Post.response.body.id}}
+
+### 4.23. Sprzątanie posta testowego: oczekuję 204
+DELETE {{baseUrl}}/posts/{{stage4Post.response.body.id}}
