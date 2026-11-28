@@ -4,11 +4,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router'
 import { login } from '../api/auth.js'
 import { CURRENT_USER_KEY } from '../auth/useCurrentUser.js'
+import { prefetchDiscover } from '../discover/useDiscover.js'
 
 function LoginPage() {
   const queryClient = useQueryClient()
 
-  // Walidacja po stronie przeglądarki tylko przyspiesza informację o błędzie. Decyduje backend.
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: { email: '', password: '' },
@@ -20,8 +20,12 @@ function LoginPage() {
 
   const loginMutation = useMutation({
     mutationFn: ({ email, password }) => login(email, password),
-    // Zapisanie użytkownika w pamięci wystarcza: RequireGuest zauważy zmianę i przekieruje dalej.
-    onSuccess: (user) => queryClient.setQueryData(CURRENT_USER_KEY, user),
+    onSuccess: (user) => {
+      queryClient.setQueryData(CURRENT_USER_KEY, user)
+      if (user?.onboardingCompleted) {
+        prefetchDiscover(queryClient)
+      }
+    },
   })
 
   return (
