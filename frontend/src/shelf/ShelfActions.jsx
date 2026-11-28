@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Alert, Button, Group, Menu, Skeleton, Stack, Text } from '@mantine/core'
+import BlindBuyModal from '../blindbuy/BlindBuyModal.jsx'
 import ConfirmModal from '../shared/ConfirmModal.jsx'
 import { useConfirmation } from '../shared/useConfirmation.js'
 import LikeLevelMenu from './LikeLevelMenu.jsx'
@@ -22,6 +24,7 @@ function ShelfActions({ perfumeId }) {
   const { data, isPending, isError, error, refetch } = useShelfEntry(perfumeId)
   const save = useSaveShelfEntry(perfumeId)
   const { ask, modalProps } = useConfirmation()
+  const [blindBuyOpened, setBlindBuyOpened] = useState(false)
 
   if (isPending) {
     return <Skeleton height={36} width={360} radius="md" />
@@ -46,14 +49,22 @@ function ShelfActions({ perfumeId }) {
   const wishlistBlocked = isWishlistBlocked(state)
 
   function selectPlacement(placement) {
-    if (state.placement !== placement) {
-      save.mutate(withPlacement(state, placement))
+    if (state.placement === placement) {
+      return
     }
+    if (placement === 'wishlist') {
+      setBlindBuyOpened(true)
+      return
+    }
+    save.mutate(withPlacement(state, placement))
+  }
+
+  function confirmWishlist() {
+    save.mutate(withPlacement(state, 'wishlist'), { onSuccess: () => setBlindBuyOpened(false) })
   }
 
   function handleDislikedClick() {
     if (isDisliked) {
-      // Ponowne kliknięcie podświetlonego przycisku usuwa opinię, więc pytamy.
       ask(REMOVE_CONFIRMATIONS.disliked, () => save.mutate(withoutOpinion(state)))
       return
     }
@@ -129,6 +140,13 @@ function ShelfActions({ perfumeId }) {
         </Button>
       </Group>
       <ConfirmModal {...modalProps} />
+      <BlindBuyModal
+        opened={blindBuyOpened}
+        onClose={() => setBlindBuyOpened(false)}
+        onConfirm={confirmWishlist}
+        perfumeId={perfumeId}
+        isSaving={save.isPending}
+      />
     </>
   )
 }
