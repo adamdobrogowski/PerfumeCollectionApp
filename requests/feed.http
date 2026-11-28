@@ -1,0 +1,120 @@
+@baseUrl = http://localhost:8080/api/v1
+
+### 1. Odczyt tablicy bez zalogowania: oczekuję 401
+GET {{baseUrl}}/posts
+
+### 2. Logowanie jako użytkownik 1 (konto testowe z Etapu 1): oczekuję 200
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick1@example.com",
+  "password": "Przykladowe-haslo-123"
+}
+
+### 3. Podgląd katalogu perfum (opcjonalnie, gdyby ID 1 lub 2 nie istniały w bazie)
+GET {{baseUrl}}/perfumes?limit=2
+
+### 4. Utworzenie posta SOTD z dwoma perfumami: oczekuję 201 i pełnego obiektu posta
+# @name createSotd
+POST {{baseUrl}}/posts
+Content-Type: application/json
+
+{
+  "kind": "sotd",
+  "body": "Dzisiaj testuję klasykę na chłodniejszy wieczór.",
+  "perfumeIds": [1, 2]
+}
+
+### 5. SOTD bez oznaczonych perfum: oczekuję 400 i fields.perfumeIds
+POST {{baseUrl}}/posts
+Content-Type: application/json
+
+{
+  "kind": "sotd",
+  "body": "Brakuje flakonu.",
+  "perfumeIds": []
+}
+
+### 6. Nieistniejące ID perfum (test ROLLBACK transakcji): oczekuję 400 i fields.perfumeIds
+POST {{baseUrl}}/posts
+Content-Type: application/json
+
+{
+  "kind": "sotd",
+  "body": "Ten post nie może zapisać się w bazie.",
+  "perfumeIds": [999999999]
+}
+
+### 7. Utworzenie wpisu swobodnego bez perfum: oczekuję 201 i perfumes: []
+POST {{baseUrl}}/posts
+Content-Type: application/json
+
+{
+  "kind": "free",
+  "body": "Jak przechowujecie odlewki w podróży?"
+}
+
+### 8. Tablica globalna z limitem 1: oczekuję 200, 1 element i niepusty nextCursor
+# @name firstPage
+GET {{baseUrl}}/posts?scope=global&limit=1
+
+### 9. Kolejna strona tablicy po kursorze: oczekuję 200 i starszego posta
+GET {{baseUrl}}/posts?scope=global&limit=1&cursor={{firstPage.response.body.nextCursor}}
+
+### 10. Pobranie pojedynczego posta SOTD: oczekuję 200 z editedAt: null
+GET {{baseUrl}}/posts/{{createSotd.response.body.id}}
+
+### 11. Edycja treści posta: oczekuję 200 z nową treścią i niepustym editedAt
+PATCH {{baseUrl}}/posts/{{createSotd.response.body.id}}
+Content-Type: application/json
+
+{
+  "body": "Dzisiaj testuję klasykę na chłodniejszy wieczór — projekcja świetna."
+}
+
+### 12. Powtórna edycja tą samą treścią: oczekuję 200 bez dopisania duplikatu do historii
+PATCH {{baseUrl}}/posts/{{createSotd.response.body.id}}
+Content-Type: application/json
+
+{
+  "body": "Dzisiaj testuję klasykę na chłodniejszy wieczór — projekcja świetna."
+}
+
+### 13. Historia edycji posta: oczekuję 200 i dokładnie 1 wpis z oryginalną treścią z pkt 4
+GET {{baseUrl}}/posts/{{createSotd.response.body.id}}/edits
+
+### 14. Przełączenie na użytkownika 2 (do testu uprawnień): oczekuję 200
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick2@example.com",
+  "password": "Przykladowe-haslo-123"
+}
+
+### 15. Próba edycji cudzego posta: oczekuję 403
+PATCH {{baseUrl}}/posts/{{createSotd.response.body.id}}
+Content-Type: application/json
+
+{
+  "body": "Próba podmiany cudzego wpisu."
+}
+
+### 16. Próba usunięcia cudzego posta: oczekuję 403
+DELETE {{baseUrl}}/posts/{{createSotd.response.body.id}}
+
+### 17. Powrót na użytkownika 1 (autora): oczekuję 200
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick1@example.com",
+  "password": "Przykladowe-haslo-123"
+}
+
+### 18. Usunięcie własnego posta: oczekuję 204
+DELETE {{baseUrl}}/posts/{{createSotd.response.body.id}}
+
+### 19. Odczyt usuniętego posta: oczekuję 404
+GET {{baseUrl}}/posts/{{createSotd.response.body.id}}

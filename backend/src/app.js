@@ -12,6 +12,7 @@ const blindBuyCheckRoutes = require("./routes/blind-buy-check");
 const smartMatchingRoutes = require("./routes/smart-matching");
 const onboardingRoutes = require("./routes/onboarding");
 const shelfStatsRoutes = require("./routes/shelf-stats");
+const postsRoutes = require("./routes/posts");
 
 const app = express();
 app.use(helmet());
@@ -28,6 +29,7 @@ app.use("/api/v1/discover", discoverRoutes);
 app.use("/api/v1/perfumes", blindBuyCheckRoutes);
 app.use("/api/v1/perfumes", smartMatchingRoutes);
 app.use("/api/v1/onboarding", onboardingRoutes);
+app.use("/api/v1/posts", postsRoutes);
 
 app.get("/api/v1/health", (req, res) => {
   res.status(200).json({
