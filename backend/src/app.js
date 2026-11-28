@@ -15,6 +15,8 @@ const shelfStatsRoutes = require("./routes/shelf-stats");
 const postsRoutes = require("./routes/posts");
 const postCommentsRoutes = require("./routes/post-comments");
 const postVotesRoutes = require("./routes/post-votes");
+const profilesRoutes = require("./routes/profiles");
+const followsRoutes = require("./routes/follows");
 
 const app = express();
 app.use(helmet());
@@ -34,6 +36,8 @@ app.use("/api/v1/onboarding", onboardingRoutes);
 app.use("/api/v1/posts", postsRoutes);
 app.use("/api/v1/posts", postCommentsRoutes);
 app.use("/api/v1/posts", postVotesRoutes);
+app.use("/api/v1/profiles", profilesRoutes);
+app.use("/api/v1/profiles", followsRoutes)
 
 app.get("/api/v1/health", (req, res) => {
   res.status(200).json({

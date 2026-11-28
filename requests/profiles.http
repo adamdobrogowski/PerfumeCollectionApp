@@ -1,0 +1,174 @@
+@baseUrl = http://localhost:8080/api/v1
+
+### 1. Logowanie jako użytkownik 1: oczekuję 200
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick1@example.com",
+  "password": "Przykladowe-haslo-123"
+}
+
+### 2. Pobranie własnego profilu (użytkownik 1): oczekuję 200
+# @name user1Me
+GET {{baseUrl}}/profiles/me
+
+### 3. Edycja bio i prywatności półki: oczekuję 200 z nowym bio i shelfIsPrivate: false
+PATCH {{baseUrl}}/profiles/me
+Content-Type: application/json
+
+{
+  "bio": "Kolekcjoner zapachów drzewnych i żywicznych.",
+  "shelfIsPrivate": false
+}
+
+### 4. Próba zajęcia nicku użytkownika 2 (inna wielkość liter): oczekuję 409 i fields.displayName
+PATCH {{baseUrl}}/profiles/me
+Content-Type: application/json
+
+{
+  "displayName": "wolnynick_test2"
+}
+
+### 5. Wyszukiwanie profili po fragmencie nicku: oczekuję 200 i listę dopasowań
+GET {{baseUrl}}/profiles?q=nick&limit=10
+
+### 6. Utworzenie posta przez użytkownika 1 (do testu osi czasu i prywatności): oczekuję 201
+# @name user1Post
+POST {{baseUrl}}/posts
+Content-Type: application/json
+
+{
+  "kind": "free",
+  "body": "Wpis testowy do sprawdzenia prywatności profilu i obserwowania."
+}
+
+### 7. Przełączenie na użytkownika 2: oczekuję 200
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick2@example.com",
+  "password": "Przykladowe-haslo-123"
+}
+
+### 8. Pobranie własnego profilu (użytkownik 2): oczekuję 200
+# @name user2Me
+GET {{baseUrl}}/profiles/me
+
+### 9. Podgląd publicznego profilu użytkownika 1: oczekuję 200, canViewPosts: true, followStatus: null
+GET {{baseUrl}}/profiles/{{user1Me.response.body.id}}
+
+### 10. Próba obserwowania samego siebie: oczekuję 400
+POST {{baseUrl}}/profiles/{{user2Me.response.body.id}}/follow
+
+### 11. Obserwowanie publicznego profilu użytkownika 1: oczekuję 201 i { status: "accepted" }
+POST {{baseUrl}}/profiles/{{user1Me.response.body.id}}/follow
+
+### 12. Ponowne obserwowanie (idempotentność): oczekuję 200 i { status: "accepted" }
+POST {{baseUrl}}/profiles/{{user1Me.response.body.id}}/follow
+
+### 13. Tablica obserwowanych użytkownika 2: oczekuję 200 z widocznym postem z pkt 6
+GET {{baseUrl}}/posts?scope=following
+
+### 14. Przestanie obserwowania użytkownika 1: oczekuję 200 i { status: null }
+DELETE {{baseUrl}}/profiles/{{user1Me.response.body.id}}/follow
+
+### 15. Powrót na użytkownika 1 i przełączenie konta na prywatne: oczekuję 200
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick1@example.com",
+  "password": "Przykladowe-haslo-123"
+}
+
+### 16. Ustawienie isPrivate: true: oczekuję 200
+PATCH {{baseUrl}}/profiles/me
+Content-Type: application/json
+
+{
+  "isPrivate": true
+}
+
+### 17. Przełączenie na użytkownika 2 (test blokady prywatnego profilu): oczekuję 200
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick2@example.com",
+  "password": "Przykladowe-haslo-123"
+}
+
+### 18. Wizytówka prywatnego profilu: oczekuję 200, isPrivate: true, canViewPosts: false
+GET {{baseUrl}}/profiles/{{user1Me.response.body.id}}
+
+### 19. Próba podejrzenia osi czasu prywatnego profilu: oczekuję 403
+GET {{baseUrl}}/profiles/{{user1Me.response.body.id}}/posts
+
+### 20. Próba podejrzenia pojedynczego posta prywatnego konta: oczekuję 404
+GET {{baseUrl}}/posts/{{user1Post.response.body.id}}
+
+### 21. Próba podejrzenia obserwujących prywatnego konta: oczekuję 403
+GET {{baseUrl}}/profiles/{{user1Me.response.body.id}}/followers
+
+### 22. Wysłanie prośby o obserwowanie prywatnego profilu: oczekuję 201 i { status: "pending" }
+POST {{baseUrl}}/profiles/{{user1Me.response.body.id}}/follow
+
+### 23. Powrót na użytkownika 1 (akceptacja prośby): oczekuję 200
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick1@example.com",
+  "password": "Przykladowe-haslo-123"
+}
+
+### 24. Lista oczekujących próśb użytkownika 1: oczekuję 200 z użytkownikiem 2
+GET {{baseUrl}}/profiles/me/follow-requests
+
+### 25. Akceptacja prośby użytkownika 2: oczekuję 200 i { status: "accepted" }
+POST {{baseUrl}}/profiles/me/follow-requests/{{user2Me.response.body.id}}/accept
+
+### 26. Lista próśb po akceptacji: oczekuję 200 i pustej tablicy items
+GET {{baseUrl}}/profiles/me/follow-requests
+
+### 27. Przełączenie na użytkownika 2 (sprawdzenie odblokowania dostępu): oczekuję 200
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick2@example.com",
+  "password": "Przykladowe-haslo-123"
+}
+
+### 28. Oś czasu prywatnego profilu po akceptacji: oczekuję 200 z postem z pkt 6
+GET {{baseUrl}}/profiles/{{user1Me.response.body.id}}/posts
+
+### 29. Lista obserwujących po akceptacji: oczekuję 200 z użytkownikiem 2
+GET {{baseUrl}}/profiles/{{user1Me.response.body.id}}/followers
+
+### 30. Sprzątanie: przestanie obserwowania użytkownika 1: oczekuję 200
+DELETE {{baseUrl}}/profiles/{{user1Me.response.body.id}}/follow
+
+### 31. Sprzątanie: powrót na użytkownika 1: oczekuję 200
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "tomasz+nick1@example.com",
+  "password": "Przykladowe-haslo-123"
+}
+
+### 32. Sprzątanie: przywrócenie publicznego profilu i wyczyszczenie bio: oczekuję 200
+PATCH {{baseUrl}}/profiles/me
+Content-Type: application/json
+
+{
+  "bio": null,
+  "isPrivate": false,
+  "shelfIsPrivate": true
+}
+
+### 33. Sprzątanie: usunięcie testowego posta: oczekuję 204
+DELETE {{baseUrl}}/posts/{{user1Post.response.body.id}}
